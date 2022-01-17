@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="true"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+    <arg name="gui_required" default="true"/>
+    <arg name="mesh_enabled" default="true"/>
+
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="headless" value="$(arg headless)"/>
+        <arg name="debug" value="$(arg debug)"/>
+        <arg name="verbose" default="false"/>
+        <arg name="gui_required" value="$(arg gui_required)"/>
+
+    </include>
+
+    
+
+
+    <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm.xacro'
+        --inorder " />
+
+    <node name="vacumm_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="  -z 0.0 
+                    -urdf 
+                    -param robot_description 
+                    -model vacumm_robot" />
+
+
+    <rosparam command="load" file="$(find vacumm_control)/config/control.yaml" />
+
+    <node name="base_controller_spawner" pkg="controller_manager" type="spawner" 
+            args="  joint_state_controller
+                    diff_drive_controller
+                            "/>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    </node>
+
+    <node name="rviz" pkg= "rviz" type = "rviz" output="screen" />
+
+
+</launch>
