@@ -26,7 +26,7 @@
     <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm.xacro'
         --inorder " />
 
-    <node name="vacumm_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="  -z 0.0 
+    <node name="vacumm_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="  -z 0.0
                     -urdf 
                     -param robot_description 
                     -model vacumm_robot" />
@@ -44,5 +44,7 @@
 
     <node name="rviz" pkg= "rviz" type = "rviz" output="screen" />
 
+    <node name="rqt_robot_steering" pkg= "rqt_robot_steering" type = "rqt_robot_steering" output="screen" />
+    
 
 </launch>
