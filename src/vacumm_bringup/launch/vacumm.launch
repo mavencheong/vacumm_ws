@@ -23,7 +23,7 @@
     
 
 
-    <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm2.xacro'
+    <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm3.xacro'
         --inorder " />
 
     <node name="vacumm_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="  -z 0.0
