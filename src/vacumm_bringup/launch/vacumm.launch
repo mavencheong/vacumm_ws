@@ -42,6 +42,12 @@
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
     </node>
 
+    <node name="pointcloud_to_laserscan" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node">
+        <remap from="cloud_in" to="/camera/depth/points" />
+        <remap from="scan" to="/camera/scan" />
+        
+    </node>
+
     <node name="rviz" pkg= "rviz" type = "rviz" output="screen" />
 
     <node name="rqt_robot_steering" pkg= "rqt_robot_steering" type = "rqt_robot_steering" output="screen" >
