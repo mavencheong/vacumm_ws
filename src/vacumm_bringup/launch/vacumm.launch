@@ -44,7 +44,9 @@
 
     <node name="rviz" pkg= "rviz" type = "rviz" output="screen" />
 
-    <node name="rqt_robot_steering" pkg= "rqt_robot_steering" type = "rqt_robot_steering" output="screen" />
+    <node name="rqt_robot_steering" pkg= "rqt_robot_steering" type = "rqt_robot_steering" output="screen" >
+        <param name="default_topic" type="str" value="/diff_drive_controller/cmd_vel" />
+    </node>
     
 
 </launch>
