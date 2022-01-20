@@ -19,8 +19,8 @@
 
     <!-- My maze -->
     <include>
-      <uri>model://vacumm_maze</uri>
-	<pose> 1.75 1.5 0 0 0 0</pose>
+      <uri>model://vacumm_maze2</uri>
+	<pose> 0 0 0 0 0 0</pose>
     </include>
 
     <physics type="ode">
