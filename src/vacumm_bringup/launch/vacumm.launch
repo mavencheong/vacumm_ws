@@ -50,28 +50,33 @@
                     -model vacumm_robot" />
 
 
-    <rosparam command="load" file="$(find vacumm_control)/config/control.yaml" />
+     <rosparam command="load" file="$(find vacumm_control)/config/control.yaml" />
 
-    <node name="base_controller_spawner" pkg="controller_manager" type="spawner" 
+    <!--<node name="base_controller_spawner" pkg="controller_manager" type="spawner" 
             args="  joint_state_controller
                     diff_drive_controller
-                            "/>
+                            "/> -->
+
+    <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    </node> -->
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" ></node>
 
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
     </node>
 
-    <!-- <node name="pointcloud_to_laserscan" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node">
+    <node name="pointcloud_to_laserscan" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node">
         <remap from="cloud_in" to="/camera/depth/points" />
         <remap from="scan" to="/camera/scan" />
         <param name="target_frame" type="str" value="camera_link"/>
-    </node> -->
+    </node>
 
-     <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
+     <!-- <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
       <remap from="image"       to="/camera/depth/image_raw"/>
       <remap from="camera_info" to="/camera/rgb/camera_info"/>
       <remap from="scan"        to="/camera/scan"/>
       <param name="range_max" type="double" value="4"/>
-    </node>
+    </node> -->
 
     <node name="rtabmap" pkg="rtabmap_ros" type="rtabmap" output="screen" args="$(arg args)">
 	  <param name="database_path"       type="string" value="$(arg database_path)"/>
