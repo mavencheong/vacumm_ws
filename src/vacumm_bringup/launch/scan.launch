@@ -8,22 +8,22 @@
     <arg name="gui_required" default="true"/>
     <arg name="mesh_enabled" default="true"/>
 
-    <arg name="database_path"     default="rtabmap.db"/>
-    <arg name="rgbd_odometry"     default="false"/>
-    <arg name="rtabmapviz"        default="true"/>
-    <arg name="localization"      default="false"/>
-    <arg name="simulation"        default="true"/>
-    <arg name="sw_registered"     default="false"/>
-    <arg     if="$(arg localization)" name="args"  default=""/>
-    <arg unless="$(arg localization)" name="args"  default="--delete_db_on_start"/>
+    <arg name="database_path" default="rtabmap.db"/>
+    <arg name="rgbd_odometry" default="false"/>
+    <arg name="rtabmapviz" default="true"/>
+    <arg name="localization" default="false"/>
+    <arg name="simulation" default="true"/>
+    <arg name="sw_registered" default="false"/>
+    <arg if="$(arg localization)" name="args" default=""/>
+    <arg unless="$(arg localization)" name="args" default="--delete_db_on_start"/>
 
-    <arg     if="$(arg simulation)" name="rgb_topic"   default="/camera/rgb/image_raw"/>
-    <arg unless="$(arg simulation)" name="rgb_topic"   default="/camera/rgb/image_rect_color"/>
-    <arg     if="$(arg simulation)" name="depth_topic" default="/camera/depth/image_raw"/>
+    <arg if="$(arg simulation)" name="rgb_topic" default="/camera/rgb/image_raw"/>
+    <arg unless="$(arg simulation)" name="rgb_topic" default="/camera/rgb/image_rect_color"/>
+    <arg if="$(arg simulation)" name="depth_topic" default="/camera/depth/image_raw"/>
     <arg unless="$(arg simulation)" name="depth_topic" default="/camera/depth_registered/image_raw"/>
     <arg name="camera_info_topic" default="/camera/rgb/camera_info"/>
-    
-    <arg name="wait_for_transform"  default="0.2"/> 
+
+    <arg name="wait_for_transform" default="0.2"/>
 
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -38,7 +38,7 @@
 
     </include>
 
-    
+
 
 
     <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm4.xacro'
@@ -52,8 +52,7 @@
 
     <rosparam command="load" file="$(find vacumm_control)/config/control.yaml" />
 
-    <node name="base_controller_spawner" pkg="controller_manager" type="spawner" 
-            args="  joint_state_controller
+    <node name="base_controller_spawner" pkg="controller_manager" type="spawner" args="  joint_state_controller
                     diff_drive_controller
                             "/>
 
@@ -66,20 +65,20 @@
         <param name="target_frame" type="str" value="camera_link"/>
     </node> -->
 
-     <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
-      <remap from="image"       to="/camera/depth/image_raw"/>
-      <remap from="camera_info" to="/camera/rgb/camera_info"/>
-      <remap from="scan"        to="/camera/scan"/>
-      <param name="range_max" type="double" value="4"/>
+    <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
+        <remap from="image" to="/camera/depth/image_raw"/>
+        <remap from="camera_info" to="/camera/rgb/camera_info"/>
+        <remap from="scan" to="/camera/scan"/>
+        <param name="range_max" type="double" value="4"/>
     </node>
 
-    
 
-     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rtabmap_ros)/launch/config/turtlebot_navigation.rviz"/>
 
-    <node name="rqt_robot_steering" pkg= "rqt_robot_steering" type = "rqt_robot_steering" output="screen" >
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rtabmap_ros)/launch/config/turtlebot_navigation.rviz"/>
+
+    <node name="rqt_robot_steering" pkg= "rqt_robot_steering" type = "rqt_robot_steering" output="screen">
         <param name="default_topic" type="str" value="/diff_drive_controller/cmd_vel" />
     </node>
-    
+
 
 </launch>
