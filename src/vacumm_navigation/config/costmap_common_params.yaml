@@ -1,0 +1,25 @@
+
+obstacle_range: 3.0
+raytrace_range: 3.0
+robot_radius: 0.25
+footprint_padding: 0.1
+# footprint: [[0.15, 0.15], [0.15, -0.15], [-0.15, -0.15], [-0.15, 0.14]]
+map_topic: /map
+subscribe_to_updates: true
+observation_sources: laser_scan_sensor
+laser_scan_sensor: {sensor_frame: laser, data_type: LaserScan, topic: /camera/scan, marking: true, clearing: true}
+global_frame: map
+robot_base_frame: base_footprint
+always_send_full_costmap: true
+
+static_layer:
+  map_topic: /map
+  subscribe_to_updates: true
+# inflater_layer:
+  # inflation_radius: 1
+  # cost_scaling_factor: 10.0
+
+plugins:
+  - {name: static,           type: "costmap_2d::StaticLayer"}
+  - {name: obstacles,        type: "costmap_2d::ObstacleLayer"}
+  - {name: inflation,        type: "costmap_2d::InflationLayer"}
