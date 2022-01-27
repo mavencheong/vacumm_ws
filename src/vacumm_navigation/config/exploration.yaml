@@ -1,23 +1,24 @@
-# footprint: [[0.12, 0.14], [0.12, -0.14], [-0.12, -0.14], [-0.12, 0.14]]
-robot_radius: 0.25
-footprint_padding: 0.1
-transform_tolerance: 5
-# update_frequency: 20
-# publish_frequency: 20
-global_frame: map
-robot_base_frame: base_footprint
+# # footprint: [[0.12, 0.14], [0.12, -0.14], [-0.12, -0.14], [-0.12, 0.14]]
+# robot_radius: 0.1175
+# footprint_padding: 0
+# transform_tolerance: 5
+# # update_frequency: 20
+# # publish_frequency: 20
+# global_frame: map
+# robot_base_frame: base_footprint
 
-plugins: 
-    - {name: static,           type: "costmap_2d::StaticLayer"}
-    - {name: explore_boundary, type: "frontier_exploration::BoundedExploreLayer"}
-    - {name: inflation,        type: "costmap_2d::InflationLayer"}
+# plugins: 
+#     - {name: static,           type: "costmap_2d::StaticLayer"}
+#     - {name: explore_boundary, type: "frontier_exploration::BoundedExploreLayer"}
+#     - {name: inflation,        type: "costmap_2d::InflationLayer"}
 
-static:
-    map_topic: /map
-    subscribe_to_updates: true
-explore_boundary:
-    resize_to_boundary: false
-    frontier_travel_point: "middle" 
-    explore_clear_space: false
-inflation:
-    inflation_radius: 0.4
+# static:
+#     map_topic: /map
+#     subscribe_to_updates: true
+# explore_boundary:
+#     resize_to_boundary: false
+#     frontier_travel_point: "middle" 
+#     explore_clear_space: false
+# inflation:
+#     inflation_radius: 0.1
+#     cost_scaling_factor: 0.5

@@ -89,5 +89,6 @@
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rtabmap_ros)/launch/config/turtlebot_navigation.rviz"/>
 
+   <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" />
 
 </launch>
