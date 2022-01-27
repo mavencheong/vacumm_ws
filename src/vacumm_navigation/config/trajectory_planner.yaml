@@ -1,6 +1,6 @@
 # controller_frequency: 15.0
 TrajectoryPlannerROS:
-  max_vel_x: 0.2
+  max_vel_x: 0.4
   min_vel_x: 0.05
   max_vel_theta: 1.5
   min_vel_theta: -1.5

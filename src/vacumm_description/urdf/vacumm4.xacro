@@ -328,12 +328,12 @@
   <xacro:wheel_transmission prefix="right" />
 
   <xacro:macro name="sensor_kinect" params="parent">
-    <joint name="camera_rgb_joint" type="fixed">
+    <joint name="camera_joint" type="fixed">
       <origin xyz="${cam_px} ${kinect_cam_py} ${cam_pz}" rpy="${cam_or} ${cam_op} ${cam_oy}"/>
       <parent link="${parent}"/>
-      <child link="camera_rgb_frame" />
+      <child link="camera_link" />
     </joint>
-    <link name="camera_rgb_frame"/>
+    <link name="camera_link"/>
 
     <joint name="camera_rgb_optical_joint" type="fixed">
       <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
@@ -342,12 +342,12 @@
     </joint>
     <link name="camera_rgb_optical_frame"/>
 
-    <joint name="camera_joint" type="fixed">
+    <joint name="camera_rgb_joint" type="fixed">
       <origin xyz="-0.031 ${-kinect_cam_py} -0.016" rpy="0 0 0"/>
-      <parent link="camera_rgb_frame"/>
-      <child link="camera_link"/>
+      <parent link="camera_link"/>
+      <child link="camera_rgb_frame"/>
     </joint>
-    <link name="camera_link">
+    <link name="camera_rgb_frame">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 ${M_PI/2}"/>
         <geometry>

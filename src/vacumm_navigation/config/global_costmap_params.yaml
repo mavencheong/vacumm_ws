@@ -3,8 +3,10 @@ global_costmap:
   publish_frequency: 1.5
   transform_tolerance: 0.5
   static_map: true
+  width: 20
+  height: 20
   rolling_window: true
   resolution: 0.01
   inflation:
-    inflation_radius: 0.3
-    cost_scaling_factor: 0.5
+    inflation_radius: 1.75
+    cost_scaling_factor: 2.58
