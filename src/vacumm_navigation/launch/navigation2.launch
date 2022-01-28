@@ -87,15 +87,15 @@
     <rosparam file="$(find vacumm_navigation)/config2/costmap_common_params.yaml" command="load" ns="local_costmap" />
     <rosparam file="$(find vacumm_navigation)/config2/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find vacumm_navigation)/config2/global_costmap_params.yaml" command="load" /> 
-    <!-- <rosparam file="$(find vacumm_navigation)/config2/base_local_planner_params.yaml" command="load" /> -->
+    <rosparam file="$(find vacumm_navigation)/config2/base_local_planner_params.yaml" command="load" />
     <rosparam file="$(find vacumm_navigation)/config2/global_planner.yaml" command="load" ns="GlobalPlanner" />
-    <rosparam file="$(find vacumm_navigation)/config2/dwa_local_planner.yaml" command="load" ns="DWAPlannerROS" />
+    <!-- <rosparam file="$(find vacumm_navigation)/config2/dwa_local_planner.yaml" command="load" ns="DWAPlannerROS" /> -->
     <!-- <param name="move_base/DWAPlannerROS/yaw_goal_tolerance" value="1.0"/>
     <param name="move_base/DWAPlannerROS/xy_goal_tolerance" value="1.0"/>
     <param name="move_base/DWAPlannerROS/xy_goal_tolerance" value="1.0"/> -->
 
     <param name="base_global_planner" value="global_planner/GlobalPlanner"/>
-    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
+    <!-- <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/> -->
     
   </node>
 

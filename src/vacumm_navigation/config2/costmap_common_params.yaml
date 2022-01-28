@@ -6,7 +6,7 @@ raytrace_range: 3.0
 robot_radius: 0.1175
 
 planner_patience: 3.0
-planner_frequency: 2.0
+
 controller_frequency: 5.0
 controller_frequency: 5.0
 clearing_rotation_allowed: true

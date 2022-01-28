@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<launch>
+
+
+  <master auto="start"/>
+  <!-- arguments -->
+  <param name="use_sim_time" value="true"/>
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="gui_required" default="true"/>
+  <arg name="mesh_enabled" default="true"/>
+
+
+
+  <!-- Map server -->
+  <arg name="map_file" default="$(find vacumm_navigation)/maps/maze3.yaml"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find vacumm_description)/worlds/vacumm_maze.world"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="verbose" default="false"/>
+    <arg name="gui_required" value="$(arg gui_required)"/>
+
+  </include>
+
+
+
+  <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm4.xacro'
+        --inorder " />
+
+  <node name="vacumm_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="  -z 0.0 -x -1.0
+                    -urdf 
+                    -param robot_description 
+                    -model vacumm_robot" />
+
+
+  <rosparam command="load" file="$(find vacumm_control)/config/control.yaml" />
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"></node>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+  </node>
+
+  <node name="pointcloud_to_laserscan" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node">
+    <remap from="cloud_in" to="/camera/depth/points" />
+    <remap from="scan" to="/camera/scan" />
+    <param name="target_frame" type="str" value="camera_link"/>
+  </node>
+
+
+
+    <arg name="scan_topic"     default="/camera/scan"/>
+  <arg name="initial_pose_x" default="0.0"/>
+  <arg name="initial_pose_y" default="0.0"/>
+  <arg name="initial_pose_a" default="0.0"/>
+  <!-- Localization -->
+  <node pkg="amcl" type="amcl" name="amcl" output="screen">
+    <param name="min_particles"             value="500"/>
+    <param name="max_particles"             value="3000"/>
+    <param name="kld_err"                   value="0.02"/>
+    <param name="update_min_d"              value="0.20"/>
+    <param name="update_min_a"              value="0.20"/>
+    <param name="resample_interval"         value="1"/>
+    <param name="transform_tolerance"       value="0.5"/>
+    <param name="recovery_alpha_slow"       value="0.00"/>
+    <param name="recovery_alpha_fast"       value="0.00"/>
+    <param name="initial_pose_x"            value="$(arg initial_pose_x)"/>
+    <param name="initial_pose_y"            value="$(arg initial_pose_y)"/>
+    <param name="initial_pose_a"            value="$(arg initial_pose_a)"/>
+    <param name="gui_publish_rate"          value="50.0"/>
+
+    <remap from="scan"                      to="$(arg scan_topic)"/>
+    <param name="laser_max_range"           value="3.5"/>
+    <param name="laser_max_beams"           value="180"/>
+    <param name="laser_z_hit"               value="0.5"/>
+    <param name="laser_z_short"             value="0.05"/>
+    <param name="laser_z_max"               value="0.05"/>
+    <param name="laser_z_rand"              value="0.5"/>
+    <param name="laser_sigma_hit"           value="0.2"/>
+    <param name="laser_lambda_short"        value="0.1"/>
+    <param name="laser_likelihood_max_dist" value="2.0"/>
+    <param name="laser_model_type"          value="likelihood_field"/>
+
+    <param name="odom_model_type"           value="diff"/>
+    <param name="odom_alpha1"               value="0.1"/>
+    <param name="odom_alpha2"               value="0.1"/>
+    <param name="odom_alpha3"               value="0.1"/>
+    <param name="odom_alpha4"               value="0.1"/>
+    <param name="odom_frame_id"             value="odom"/>
+    <param name="base_frame_id"             value="base_footprint"/>
+
+
+  </node>
+
+  <!-- Move base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
+    <rosparam file="$(find vacumm_navigation)/config3/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find vacumm_navigation)/config3/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find vacumm_navigation)/config3/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find vacumm_navigation)/config3/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find vacumm_navigation)/config3/move_base_params.yaml" command="load" />
+    <rosparam file="$(find vacumm_navigation)/config3/dwa_local_planner_params.yaml" command="load" />
+
+
+    <!-- <param name="base_global_planner" value="global_planner/GlobalPlanner"/> -->
+    
+    
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rtabmap_ros)/launch/config/turtlebot_navigation.rviz"/>
+
+   <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" />
+
+</launch>

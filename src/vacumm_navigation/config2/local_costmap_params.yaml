@@ -1,10 +1,11 @@
 local_costmap:
-    global_frame: map
+    global_frame: odom
     robot_base_frame: base_footprint
     update_frequency: 5.0
     publish_frequency: 2.0
-
-
+    planner_frequency: 2.0
+    obstacle_range: 3.0
+    raytrace_range: 4.0
     static_map: false
     rolling_window: true
     always_send_full_costmap: false
@@ -32,8 +33,7 @@ local_costmap:
 
     obstacle_layer:
       max_obstacle_height: 2.0
-      obstacle_range: 3.0
-      raytrace_range: 4.0
+      
       observation_sources: laser_scan_sensor
       footprint_clearing_enabled: true
       laser_scan_sensor: 
@@ -45,3 +45,5 @@ local_costmap:
         observation_persistence: 0.0
         expected_update_rate: 0.0
         inf_is_valid: true
+        obstacle_range: 3.0
+        raytrace_range: 4.0
