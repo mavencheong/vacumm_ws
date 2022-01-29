@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <param name="use_sim_time" value="true"/>
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="gui_required" default="true"/>
+  <arg name="mesh_enabled" default="true"/>
+
+  <arg name="database_path" default="rtabmap.db"/>
+  <arg name="rgbd_odometry" default="false"/>
+  <arg name="rtabmapviz" default="true"/>
+  <arg name="localization" default="false"/>
+  <arg name="simulation" default="true"/>
+  <arg name="sw_registered" default="false"/>
+  <arg if="$(arg localization)" name="args" default=""/>
+  <arg unless="$(arg localization)" name="args" default="--delete_db_on_start"/>
+
+  <arg if="$(arg simulation)" name="rgb_topic" default="/camera/rgb/image_raw"/>
+  <arg unless="$(arg simulation)" name="rgb_topic" default="/camera/rgb/image_rect_color"/>
+  <arg if="$(arg simulation)" name="depth_topic" default="/camera/depth/image_raw"/>
+  <arg unless="$(arg simulation)" name="depth_topic" default="/camera/depth_registered/image_raw"/>
+  <arg name="camera_info_topic" default="/camera/rgb/camera_info"/>
+
+  <arg name="wait_for_transform" default="0.2"/>
+
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find vacumm_description)/worlds/vacumm_maze.world"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="verbose" default="false"/>
+    <arg name="gui_required" value="$(arg gui_required)"/>
+
+  </include>
+
+
+  <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm4.xacro'
+        --inorder " />
+
+  <node name="vacumm_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="  -z 0.0 -x -1.0
+                    -urdf 
+                    -param robot_description 
+                    -model vacumm_robot" />
+
+
+  <rosparam command="load" file="$(find vacumm_control)/config/control.yaml" />
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"></node>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+  </node>
+
+  <node name="pointcloud_to_laserscan" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node">
+    <remap from="cloud_in" to="/camera/depth/points" />
+    <remap from="scan" to="/camera/scan" />
+    <param name="target_frame" type="str" value="camera_link"/>
+  </node>
+
+  <!-- <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
+      <remap from="image" to="/camera/depth/image_raw"/>
+      <remap from="camera_info" to="/camera/rgb/camera_info"/>
+      <remap from="scan" to="/camera/scan"/>
+      <param name="range_max" type="double" value="4"/>
+    </node> -->
+
+
+  <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+    <param name="base_frame" value="base_footprint"/>
+    <param name="odom_frame" value="odom"/>
+    <param name="map_frame" value="map"/>
+    <remap from="scan" to="/camera/scan"/>
+    <param name="delta" value="0.01" />
+    <param name="map_update_interval" value="0.1" />
+    <!-- <remap from="map" to="/map"/> -->
+    <param name="maxUrange" value="6.0"/>
+    <param name="maxRange" value="8.0"/>
+    <param name="kernelSize" value="1"/>
+    <param name="srr" value="0"/>
+    <param name="srt" value="0"/>
+    <param name="str" value="0"/>
+    <param name="stt" value="0"/>
+    <param name="particles" value="10"/>
+    <param name="linearUpdate" value="0.01"/>
+    <param name="angularUpdate" value="0.01"/>
+    <param name="temporalUpdate" value="-1.0"/>
+    <param name="resampleThreshold" value="0.5"/>
+    <param name="transform_publish_period" value="0.05"/>
+    
+    <param name="minimumScore" value="10000"/>
+    <param name="xmin" value="-100.0"/>
+    <param name="ymin" value="-100.0"/>
+    <param name="xmax" value="100.0"/>
+    <param name="ymax" value="100.0"/>
+      <param name="delta" value="0.05"/>
+  </node>
+
+    <!-- Move base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
+    <rosparam file="$(find vacumm_navigation)/config3/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find vacumm_navigation)/config3/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find vacumm_navigation)/config3/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find vacumm_navigation)/config3/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find vacumm_navigation)/config3/move_base_params.yaml" command="load" />
+    <rosparam file="$(find vacumm_navigation)/config3/dwa_local_planner_params.yaml" command="load" />
+  </node>
+
+
+  <node pkg="explore_lite" type="explore" respawn="true" name="explore" output="screen">
+    <rosparam file="$(find vacumm_navigation)/config3/exploration.yaml" command="load" />
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find vacumm_description)/rviz/vacumm.rviz"/>
+
+</launch>
+
