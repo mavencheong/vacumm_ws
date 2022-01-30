@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <param name="use_sim_time" value="true"/>
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="gui_required" default="true"/>
+  <arg name="mesh_enabled" default="true"/>
+
+  <arg name="database_path" default="rtabmap.db"/>
+  <arg name="rgbd_odometry" default="false"/>
+  <arg name="rtabmapviz" default="true"/>
+  <arg name="localization" default="false"/>
+  <arg name="simulation" default="true"/>
+  <arg name="sw_registered" default="false"/>
+  <arg if="$(arg localization)" name="args" default=""/>
+  <arg unless="$(arg localization)" name="args" default="--delete_db_on_start"/>
+
+  <arg if="$(arg simulation)" name="rgb_topic" default="/camera/rgb/image_raw"/>
+  <arg unless="$(arg simulation)" name="rgb_topic" default="/camera/rgb/image_rect_color"/>
+  <arg if="$(arg simulation)" name="depth_topic" default="/camera/depth/image_raw"/>
+  <arg unless="$(arg simulation)" name="depth_topic" default="/camera/depth_registered/image_raw"/>
+  <arg name="camera_info_topic" default="/camera/rgb/camera_info"/>
+
+  <arg name="wait_for_transform" default="0.2"/>
+
+
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find vacumm_description)/worlds/vacumm_maze.world"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="verbose" default="false"/>
+    <arg name="gui_required" value="$(arg gui_required)"/>
+
+  </include>
+
+
+  <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm4.xacro'
+        --inorder " />
+
+  <node name="vacumm_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="  -z 0.0 -x -1.0
+                    -urdf 
+                    -param robot_description 
+                    -model vacumm_robot" />
+
+
+  <rosparam command="load" file="$(find vacumm_control)/config/control.yaml" />
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"></node>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+  </node>
+
+  <node name="pointcloud_to_laserscan" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node">
+    <remap from="cloud_in" to="/camera/depth/points" />
+    <remap from="scan" to="/camera/scan" />
+    <param name="target_frame" type="str" value="camera_link"/>
+  </node>
+
+  <!-- <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
+      <remap from="image" to="/camera/depth/image_raw"/>
+      <remap from="camera_info" to="/camera/rgb/camera_info"/>
+      <remap from="scan" to="/camera/scan"/>
+      <param name="range_max" type="double" value="4"/>
+    </node> -->
+
+
+
+  <node name="rtabmap" pkg="rtabmap_ros" type="rtabmap" output="screen" args="$(arg args)">
+        <param name="database_path" type="string" value="$(arg database_path)"/>
+        <param name="frame_id" type="string" value="base_footprint"/>
+        <param name="wait_for_transform_duration" type="double" value="$(arg wait_for_transform)"/>
+        <param name="subscribe_depth" type="bool" value="true"/>
+        <param name="subscribe_scan" type="bool" value="true"/>
+        <param name="map_negative_poses_ignored" type="bool" value="true"/>
+
+        <!-- When sending goals on /rtabmap/goal topic, use actionlib to communicate with move_base -->
+        <param name="use_action_for_goal" type="bool" value="true"/>
+        <remap from="move_base" to="/move_base"/>
+
+        <!-- inputs -->
+        <remap from="scan" to="/camera/scan"/>
+        <remap from="rgb/image" to="$(arg rgb_topic)"/>
+        <remap from="depth/image" to="$(arg depth_topic)"/>
+        <remap from="rgb/camera_info" to="$(arg camera_info_topic)"/>
+
+        <!-- Fix odom covariance as in simulation the covariance in /odom topic is high (0.1 for linear and 0.05 for angular) -->
+        <param unless="$(arg rgbd_odometry)" name="odom_frame_id" value="odom"/>
+        <param unless="$(arg rgbd_odometry)" name="odom_tf_linear_variance" value="0.001"/>
+        <param unless="$(arg rgbd_odometry)" name="odom_tf_angular_variance" value="0.001"/>
+
+        <!-- output -->
+        <remap from="grid_map" to="/map"/>
+
+        <param name="RGBD/OptimizeMaxError" type="string" value="0.0"/>
+        <!--<param name="RGBD/OptimizeFromGraphEnd" type="string" value="false"/>-->
+        <param name="RGBD/AngularUpdate" type="string" value="0.1"/>
+        <param name="RGBD/LinearUpdate" type="string" value="0.1"/>
+        <param name="RGBD/LoopClosureReextractFeatures" type="string" value="true"/>
+
+        <param name="Odom/Holonomic" type="string" value="false"/>
+
+        <param name="Grid/FromDepth" type="string" value="false"/>
+
+        <param name="Optimizer/Strategy" type="string" value="1"/>
+        <param name="Optimizer/Robust" type="string" value="true"/>
+        <param name="RGBD/OptimizeMaxError" type="double" value="0"/>
+
+        <!-- localization mode -->
+        <param if="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="false"/>
+        <param unless="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="true"/>
+        <param name="Mem/InitWMWithAllNodes" type="string" value="$(arg localization)"/>
+    </node>
+
+    <!-- Move base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
+    <rosparam file="$(find vacumm_navigation)/config3/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find vacumm_navigation)/config3/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find vacumm_navigation)/config3/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find vacumm_navigation)/config3/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find vacumm_navigation)/config3/move_base_params.yaml" command="load" />
+    <rosparam file="$(find vacumm_navigation)/config3/dwa_local_planner_params.yaml" command="load" />
+  </node>
+
+
+  <node pkg="explore_lite" type="explore" respawn="true" name="explore" output="screen">
+    <rosparam file="$(find vacumm_navigation)/config3/exploration.yaml" command="load" />
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find vacumm_description)/rviz/vacumm.rviz"/>
+
+</launch>
+

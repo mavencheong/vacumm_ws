@@ -123,7 +123,7 @@
         <param name="Mem/InitWMWithAllNodes" type="string" value="$(arg localization)"/>
     </node>
 
-
+<!-- 
      <node if="$(arg rgbd_odometry)" pkg="rtabmap_ros" type="rgbd_odometry" name="rgbd_odometry" output="screen">
       <param name="frame_id"                    type="string" value="base_footprint"/>
       <param name="wait_for_transform_duration" type="double" value="$(arg wait_for_transform)"/>
@@ -133,7 +133,7 @@
       <remap from="rgb/image"       to="$(arg rgb_topic)"/>
       <remap from="depth/image"     to="$(arg depth_topic)"/>
       <remap from="rgb/camera_info" to="$(arg camera_info_topic)"/>
-    </node>
+    </node> -->
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rtabmap_ros)/launch/config/turtlebot_navigation.rviz"/>
 
