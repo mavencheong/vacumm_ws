@@ -136,6 +136,15 @@ include_directories(
 #   src/${PROJECT_NAME}/vacumm_hardware.cpp
 # )
 
+# Generic Hardware Interface
+add_library(generic_hw_interface
+  src/generic_hw_interface.cpp
+)
+target_link_libraries(generic_hw_interface
+  ${catkin_LIBRARIES}
+)
+
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
