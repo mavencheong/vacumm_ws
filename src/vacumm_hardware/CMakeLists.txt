@@ -114,9 +114,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+ INCLUDE_DIRS include
 #  LIBRARIES vacumm_hardware
-#  CATKIN_DEPENDS other_catkin_pkg
+ CATKIN_DEPENDS
 #  DEPENDS system_lib
 )
 
@@ -131,16 +131,44 @@ include_directories(
 	${catkin_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/vacumm_hardware.cpp
-# )
+
 
 # Generic Hardware Interface
-add_library(generic_hw_interface
-  src/generic_hw_interface.cpp
+# add_library(generic_hw_interface
+#   src/generic_hw_interface.cpp
+# )
+# target_link_libraries(generic_hw_interface
+#   ${catkin_LIBRARIES}
+# )
+
+# add_library(generic_hw_control_loop
+#   src/generic_hw_control_loop.cpp
+# )
+
+# target_link_libraries(generic_hw_control_loop
+#   ${catkin_LIBRARIES}
+# )
+
+# add_library(vacumm_hw_interface
+#   src/vacumm_hw_interface.cpp
+# )
+# target_link_libraries(vacumm_hw_interface
+#   generic_hw_interface
+#   ${catkin_LIBRARIES}
+# )
+
+add_executable(vacumm_hw_main 
+	include/vacumm_hw_interface.h
+	include/generic_hw_interface.h
+	include/generic_hw_control_loop.h
+	src/generic_hw_control_loop.cpp
+	src/generic_hw_interface.cpp
+	src/vacumm_hw_interface.cpp
+
+	src/vacumm_hw_main.cpp
 )
-target_link_libraries(generic_hw_interface
+add_dependencies(vacumm_hw_main ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(vacumm_hw_main
   ${catkin_LIBRARIES}
 )
 
