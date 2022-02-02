@@ -54,10 +54,10 @@ long previousMillis = 0;
 long no_comm_loop = 0;
 
 //PID Settings
-double right_kp = 0.5, right_ki = 2, right_kd = 0;
+double right_kp = 0.5, right_ki = 5.5, right_kd = 0.01;
 double right_input = 0.0, right_output = 0.0, right_setpoint = 0.0;
 
-double left_kp = 0.5, left_ki = 2, left_kd = 0;
+double left_kp = 0.5, left_ki = 5.5, left_kd = 0.01;
 double left_input = 0.0, left_output = 0.0, left_setpoint = 0.0;
 
 PID leftMotorPID(&left_input, &left_output, &left_setpoint, left_kp, left_ki, left_kd, DIRECT);
@@ -79,17 +79,16 @@ ros::Publisher wheel_state_pub("/vacumm/wheel_state", &wheel_state);
 
 
 void wheel_cmd_callback(const vacumm_hardware::WheelCmd& wheelCmd) {
-
-  char result[8];
-  char log_msg [100];
-
-  dtostrf(wheelCmd.vel[0], 6, 2, result);
-  sprintf(log_msg, "wheelCmd.vel[0] =%s", result);
-  nh.loginfo(log_msg);
-  left_motor_vel = wheelCmd.vel[0] * WHEEL_RADIUS;
-  right_motor_vel = wheelCmd.vel[1] * WHEEL_RADIUS;
-
+  set_vel(wheelCmd.vel[0], wheelCmd.vel[1]);
 }
+
+void set_vel(float left_vel, float right_vel) {
+  no_comm_loop = 0;
+  left_motor_vel = left_vel * WHEEL_RADIUS;
+  right_motor_vel = right_vel * WHEEL_RADIUS;
+}
+
+
 
 ros::Subscriber<vacumm_hardware::WheelCmd> wheel_cmd_sub("/vacumm/wheel_cmd", &wheel_cmd_callback);
 
@@ -140,7 +139,6 @@ void IRAM_ATTR right_motor_encoder_callback() {
 
 void IRAM_ATTR left_motor_encoder_callback() {
   int value = digitalRead(leftMotor.encoderPinB);
-  int increment = 1;
   if (value == 0) {
     left_motor_pulse++;
   } else {
@@ -236,6 +234,18 @@ void loop() {
     drive(left_motor_speed, right_motor_speed);
 
 
+    if (!ROS_SERIAL){
+      Serial.print(left_setpoint);
+      Serial.print(" ");
+      Serial.print(left_input);
+      Serial.print(" ");
+      Serial.print(right_setpoint);
+      Serial.print(" ");
+      Serial.print(right_input);
+      Serial.println();
+    }
+
+
     if (no_comm_loop > NO_COMM_MAX) {
       left_motor_vel = 0;
       right_motor_vel = 0;
@@ -276,9 +286,30 @@ void readCommand(){
       int commaIndex = command.indexOf(',');
       double x = command.substring(1, commaIndex).toDouble();
       double z = command.substring(commaIndex + 1, command.length()).toDouble();
-      no_comm_loop = 0;
-      left_motor_vel = x;
-      right_motor_vel = z;
+      
+      set_vel(x,z);
+  
+    } else if (command.substring(0, 1).equals("p")){
+      double value = command.substring(1).toDouble();
+      right_kp = value;
+      rightMotorPID.SetTunings(right_kp, right_ki, right_kd);
+
+      left_kp = value;
+      leftMotorPID.SetTunings(left_kp, left_ki, left_kd);
+    } else if (command.substring(0, 1).equals("i")){
+      double value = command.substring(1).toDouble();
+      right_ki = value;
+      rightMotorPID.SetTunings(right_kp, right_ki, right_kd);
+
+      left_ki = value;
+      leftMotorPID.SetTunings(left_kp, left_ki, left_kd);
+    } else if (command.substring(0, 1).equals("d")){
+      double value = command.substring(1).toDouble();
+      right_kd = value;
+      rightMotorPID.SetTunings(right_kp, right_ki, right_kd);
+
+      left_kd = value;
+      leftMotorPID.SetTunings(left_kp, left_ki, left_kd);
     }
   }
 }
