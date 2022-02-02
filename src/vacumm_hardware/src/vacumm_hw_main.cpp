@@ -20,6 +20,7 @@ int main(int argc, char **argv) {
   // Start the control loop
   ros_control_boilerplate::GenericHWControlLoop control_loop(
       nh, vacumm_hw_interface);
+
   control_loop.run(); // Blocks until shutdown signal recieved
 
   return 0;

@@ -30,6 +30,8 @@ GenericHWControlLoop::GenericHWControlLoop(
 
 void GenericHWControlLoop::run() {
   ros::Rate rate(loop_hz_);
+
+  ROS_INFO("Vacumm Hardware Main RUN.");
   while (ros::ok()) {
     update();
     rate.sleep();

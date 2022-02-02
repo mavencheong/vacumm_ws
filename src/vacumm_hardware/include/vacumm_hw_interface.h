@@ -3,6 +3,8 @@
 #define VACUMM_HW_INTERFACE_H
 
 #include <ros_control_boilerplate/generic_hw_interface.h>
+#include <vacumm_hardware/WheelCmd.h>
+#include <vacumm_hardware/WheelState.h>
 
 namespace vacumm_ns {
 /** \brief Hardware interface for a robot */
@@ -27,6 +29,9 @@ public:
   virtual void enforceLimits(ros::Duration &period);
 
 protected:
+  ros::Subscriber wheel_state_sub;
+  ros::Publisher wheel_cmd_pub;
+  void wheelStateCallback(const vacumm_hardware::WheelState::ConstPtr &msg);
 }; // class
 
 } // namespace vacumm_ns

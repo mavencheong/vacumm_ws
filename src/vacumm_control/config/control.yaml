@@ -9,9 +9,18 @@ gazebo_ros_control:
       i: 2
       d: 0.0
 
+generic_hw_control_loop:
+  loop_hz: 50 # 250 to emulate serial pause COMMAND_PERIOD 0.0055 , SERIAL_PAUSE 0.004
+  cycle_time_error_threshold: 0.1
+
 joint_state_controller:
   type: joint_state_controller/JointStateController
   publish_rate: 50
+
+hardware_interface:
+  joints:
+    - left_wheel_joint
+    - right_wheel_joint
 
 
 diff_drive_controller:
@@ -19,8 +28,8 @@ diff_drive_controller:
     left_wheel  : 'left_wheel_joint'
     right_wheel : 'right_wheel_joint'
     publish_rate: 50              # default: 50
-    pose_covariance_diagonal : [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 0.001]
-    twist_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 0.001]
+    pose_covariance_diagonal : [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.00]
+    twist_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.00]
     # pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.03]
     # twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.03]
 

@@ -50,6 +50,9 @@ void GenericHWInterface::init() {
     ROS_DEBUG_STREAM_NAMED(name_,
                            "Loading joint name: " << joint_names_[joint_id]);
 
+    ROS_INFO_STREAM_NAMED(name_,
+                          "Loading joint name: " << joint_names_[joint_id]);
+
     // Create joint state interface
     joint_state_interface_.registerHandle(hardware_interface::JointStateHandle(
         joint_names_[joint_id], &joint_position_[joint_id],
