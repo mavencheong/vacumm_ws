@@ -1,6 +1,6 @@
 
 #include <limits>
-#include <ros_control_boilerplate/generic_hw_interface.h>
+#include <generic_hw_interface.h>
 
 // ROS parameter loading
 
@@ -129,18 +129,18 @@ void GenericHWInterface::registerJointLimits(
   // Get limits from URDF
   if (joint_limits_interface::getJointLimits(urdf_joint, joint_limits)) {
     has_joint_limits = true;
-    ROS_DEBUG_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id]
+    ROS_INFO_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id]
                                            << " has URDF position limits ["
                                            << joint_limits.min_position << ", "
                                            << joint_limits.max_position << "]");
     if (joint_limits.has_velocity_limits)
-      ROS_DEBUG_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id]
+      ROS_INFO_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id]
                                              << " has URDF velocity limit ["
                                              << joint_limits.max_velocity
                                              << "]");
   } else {
     if (urdf_joint->type != urdf::Joint::CONTINUOUS)
-      ROS_WARN_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id]
+      ROS_INFO_STREAM_NAMED(name_, "Joint " << joint_names_[joint_id]
                                             << " does not have a URDF "
                                                "position limit");
   }
@@ -241,6 +241,12 @@ void GenericHWInterface::printState() {
   // WARNING: THIS IS NOT REALTIME SAFE
   // FOR DEBUGGING ONLY, USE AT YOUR OWN ROBOT's RISK!
   ROS_INFO_STREAM_THROTTLE(1, std::endl << printStateHelper());
+}
+
+void GenericHWInterface::printCommand() {
+  // WARNING: THIS IS NOT REALTIME SAFE
+  // FOR DEBUGGING ONLY, USE AT YOUR OWN ROBOT's RISK!
+  ROS_INFO_STREAM_THROTTLE(1, std::endl << printCommandHelper());
 }
 
 std::string GenericHWInterface::printStateHelper() {

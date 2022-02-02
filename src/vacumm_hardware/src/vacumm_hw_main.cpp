@@ -1,6 +1,6 @@
 
 
-#include <ros_control_boilerplate/generic_hw_control_loop.h>
+#include <generic_hw_control_loop.h>
 #include <vacumm_hw_interface.h>
 
 int main(int argc, char **argv) {

@@ -1,6 +1,6 @@
 
 
-#include <ros_control_boilerplate/generic_hw_control_loop.h>
+#include <generic_hw_control_loop.h>
 
 // ROS parameter loading
 #include <rosparam_shortcuts/rosparam_shortcuts.h>

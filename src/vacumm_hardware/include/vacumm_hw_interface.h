@@ -2,7 +2,7 @@
 #ifndef VACUMM_HW_INTERFACE_H
 #define VACUMM_HW_INTERFACE_H
 
-#include <ros_control_boilerplate/generic_hw_interface.h>
+#include <generic_hw_interface.h>
 #include <vacumm_hardware/WheelCmd.h>
 #include <vacumm_hardware/WheelState.h>
 

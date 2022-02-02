@@ -13,14 +13,16 @@ generic_hw_control_loop:
   loop_hz: 50 # 250 to emulate serial pause COMMAND_PERIOD 0.0055 , SERIAL_PAUSE 0.004
   cycle_time_error_threshold: 0.1
 
-joint_state_controller:
-  type: joint_state_controller/JointStateController
-  publish_rate: 50
-
 hardware_interface:
   joints:
     - left_wheel_joint
     - right_wheel_joint
+
+
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 50
+
 
 
 diff_drive_controller:
@@ -38,7 +40,7 @@ diff_drive_controller:
     # URDF if not specified as a parameter
     wheel_separation : 0.235
     wheel_radius : 0.04
-
+    publish_wheel_joint_controller_state: true
 
     enable_odom_tf : true
 

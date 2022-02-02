@@ -43,13 +43,10 @@ void VacummHWInterface::write(ros::Duration &elapsed_time) {
   static vacumm_hardware::WheelCmd cmd;
 
   for (int i = 0; i < num_joints_; i++) {
-    cmd.vel[i] = joint_velocity_[i];
-    cmd.pos[i] = joint_position_[i];
-
-    joint_velocity_[i] = joint_velocity_[i];
-    joint_position_[i] = joint_position_[i];
+    cmd.vel[i] = joint_velocity_command_[i];
+    cmd.pos[i] = joint_position_command_[i];
   }
-
+  
   wheel_cmd_pub.publish(cmd);
 }
 

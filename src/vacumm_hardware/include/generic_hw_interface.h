@@ -107,15 +107,17 @@ public:
 
   /** \brief Helper for debugging a joint's state */
   virtual void printState();
+  
   std::string printStateHelper();
 
+  virtual void printCommand();
   /** \brief Helper for debugging a joint's command */
   std::string printCommandHelper();
 
 protected:
   /** \brief Get the URDF XML from the parameter server */
   virtual void loadURDF(const ros::NodeHandle &nh, std::string param_name);
-
+  
   // Short name of this class
   std::string name_;
 
