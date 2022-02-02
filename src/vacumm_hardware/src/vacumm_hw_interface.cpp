@@ -46,7 +46,7 @@ void VacummHWInterface::write(ros::Duration &elapsed_time) {
     cmd.vel[i] = joint_velocity_command_[i];
     cmd.pos[i] = joint_position_command_[i];
   }
-  
+  printCommand();
   wheel_cmd_pub.publish(cmd);
 }
 
