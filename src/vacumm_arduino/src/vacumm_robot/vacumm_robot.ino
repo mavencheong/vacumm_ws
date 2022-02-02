@@ -5,7 +5,7 @@
 #include <vacumm_hardware/WheelCmd.h>
 #include <vacumm_hardware/WheelState.h>
 
-#define ROS_SERIAL false
+#define ROS_SERIAL true
 
 #define RIGHT_MOTOR_PIN_A 22
 #define RIGHT_MOTOR_PIN_B 23
@@ -26,7 +26,7 @@
 #define NO_COMM_MAX 50
 const int TICKS_PER_REVOLUTION = 420;
 const double RADS_PER_TICK_COUNT = (2 * PI) / TICKS_PER_REVOLUTION;
-
+const double WHEEL_RADIUS = 0.04;
 
 //wheels
 volatile long right_motor_pulse = 0;
@@ -86,8 +86,8 @@ void wheel_cmd_callback(const vacumm_hardware::WheelCmd& wheelCmd) {
   dtostrf(wheelCmd.vel[0], 6, 2, result);
   sprintf(log_msg, "wheelCmd.vel[0] =%s", result);
   nh.loginfo(log_msg);
-  left_motor_vel = wheelCmd.vel[0];
-  right_motor_vel = wheelCmd.vel[1];
+  left_motor_vel = wheelCmd.vel[0] * WHEEL_RADIUS;
+  right_motor_vel = wheelCmd.vel[1] * WHEEL_RADIUS;
 
 }
 
@@ -189,7 +189,7 @@ void setup() {
     nh.subscribe(wheel_cmd_sub);
   }
 
-
+  Serial.println((0.299 - 0 * 0.235 /2)/0.04);
 }
 
 void loop() {
@@ -219,13 +219,14 @@ void loop() {
     left_setpoint = left_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER ;
     right_setpoint = right_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER ;
 
-    left_motor_act_vel = left_input / VELOCITY_TO_PULSE_MULTIPLIER ;
-    right_motor_act_vel = right_input / VELOCITY_TO_PULSE_MULTIPLIER;
+    left_motor_act_vel = left_input / VELOCITY_TO_PULSE_MULTIPLIER / WHEEL_RADIUS ;
+    right_motor_act_vel = right_input / VELOCITY_TO_PULSE_MULTIPLIER / WHEEL_RADIUS;
 
     left_motor_pos = left_input * RADS_PER_TICK_COUNT;
     right_motor_pos = right_input * RADS_PER_TICK_COUNT;
 
-
+    
+  
     leftMotorPID.Compute();
     rightMotorPID.Compute();
 
