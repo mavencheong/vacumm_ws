@@ -1,6 +1,5 @@
 #include "Motor.h"
 
-//#include "PID.h"
 #include <PID_v1.h>
 #include "Kinematics.h"
 #include <ros.h>
@@ -8,7 +7,8 @@
 #include <std_msgs/String.h>
 #include <geometry_msgs/Vector3Stamped.h>
 #include <geometry_msgs/Twist.h>
-
+#include <vacumm_hardware/WheelCmd.h>
+#include <vacumm_hardware/WheelState.h>
 
 
 #define MOTOR_MAX_RPM 67
