@@ -5,7 +5,7 @@
 #include <vacumm_hardware/WheelCmd.h>
 #include <vacumm_hardware/WheelState.h>
 
-#define ROS_SERIAL true
+#define ROS_SERIAL false
 
 #define RIGHT_MOTOR_PIN_A 22
 #define RIGHT_MOTOR_PIN_B 23
@@ -19,7 +19,7 @@
 #define LEFT_MOTOR_ENCODER_A 5
 #define LEFT_MOTOR_ENCODER_B 18
 #define LEFT_MOTOR_ENABLE_PIN 27
-#define VELOCITY_TO_PULSE_MULTIPLIER 157.20
+#define VELOCITY_TO_PULSE_MULTIPLIER 150.50
 
 #define INTERVAL 100
 #define PWM_CHANNEL 0
@@ -162,11 +162,11 @@ void setup() {
 
   rightMotorPID.SetMode(AUTOMATIC);
   rightMotorPID.SetSampleTime(INTERVAL);
-  rightMotorPID.SetOutputLimits(-47, 47); // max tick that it can go at 1000 ms (0.299 * 47 ticks)
+  rightMotorPID.SetOutputLimits(-45, 45); // max tick that it can go at 1000 ms (0.299 * 47 ticks)
   ////
   leftMotorPID.SetMode(AUTOMATIC);
   leftMotorPID.SetSampleTime(INTERVAL);
-  leftMotorPID.SetOutputLimits(-47, 47);
+  leftMotorPID.SetOutputLimits(-45, 45);
 
   drive(0, 0); //reset speed to 0;
 
@@ -187,7 +187,7 @@ void setup() {
     nh.subscribe(wheel_cmd_sub);
   }
 
-  Serial.println((0.299 - 0 * 0.235 /2)/0.04);
+  //  drive(255, 255);
 }
 
 void loop() {
@@ -220,21 +220,21 @@ void loop() {
     left_motor_act_vel = left_input / VELOCITY_TO_PULSE_MULTIPLIER / WHEEL_RADIUS ;
     right_motor_act_vel = right_input / VELOCITY_TO_PULSE_MULTIPLIER / WHEEL_RADIUS;
 
-    left_motor_pos = left_input * RADS_PER_TICK_COUNT;
-    right_motor_pos = right_input * RADS_PER_TICK_COUNT;
+    left_motor_pos = left_motor_pulse * RADS_PER_TICK_COUNT;
+    right_motor_pos = right_motor_pulse * RADS_PER_TICK_COUNT;
 
-    
-  
+
+
     leftMotorPID.Compute();
     rightMotorPID.Compute();
 
-    left_motor_speed = map (left_output, -47, 47, -255, 255);
-    right_motor_speed = map(right_output, -47, 47, -255, 255);
+    left_motor_speed = map (left_output, -45, 45, -200, 255);
+    right_motor_speed = map(right_output, -45, 45, -255, 190);
 
     drive(left_motor_speed, right_motor_speed);
 
 
-    if (!ROS_SERIAL){
+    if (!ROS_SERIAL) {
       Serial.print(left_setpoint);
       Serial.print(" ");
       Serial.print(left_input);
@@ -242,7 +242,10 @@ void loop() {
       Serial.print(right_setpoint);
       Serial.print(" ");
       Serial.print(right_input);
+      Serial.print(" ");
+      Serial.print(left_motor_pos);
       Serial.println();
+
     }
 
 
@@ -277,39 +280,42 @@ void publish_wheel_state() {
 }
 
 
-void readCommand(){
-  if (Serial.available()){
+void readCommand() {
+  if (Serial.available()) {
     String command = Serial.readStringUntil('\n');
 
     Serial.printf("Command received %s \n", command);
-     if (command.substring(0, 1).equals("v")){
+    if (command.substring(0, 1).equals("v")) {
       int commaIndex = command.indexOf(',');
       double x = command.substring(1, commaIndex).toDouble();
       double z = command.substring(commaIndex + 1, command.length()).toDouble();
-      
-      set_vel(x,z);
-  
-    } else if (command.substring(0, 1).equals("p")){
+
+      set_vel(x, z);
+
+    } else if (command.substring(0, 1).equals("p")) {
       double value = command.substring(1).toDouble();
       right_kp = value;
       rightMotorPID.SetTunings(right_kp, right_ki, right_kd);
 
       left_kp = value;
       leftMotorPID.SetTunings(left_kp, left_ki, left_kd);
-    } else if (command.substring(0, 1).equals("i")){
+    } else if (command.substring(0, 1).equals("i")) {
       double value = command.substring(1).toDouble();
       right_ki = value;
       rightMotorPID.SetTunings(right_kp, right_ki, right_kd);
 
       left_ki = value;
       leftMotorPID.SetTunings(left_kp, left_ki, left_kd);
-    } else if (command.substring(0, 1).equals("d")){
+    } else if (command.substring(0, 1).equals("d")) {
       double value = command.substring(1).toDouble();
       right_kd = value;
       rightMotorPID.SetTunings(right_kp, right_ki, right_kd);
 
       left_kd = value;
       leftMotorPID.SetTunings(left_kp, left_ki, left_kd);
+    } else if (command.substring(0, 1).equals("s")) {
+      double value = command.substring(1).toInt();
+      drive(255,  value);
     }
   }
 }

@@ -25,24 +25,13 @@ void Motor::rotate(int power){
   int absPower = abs(power);
 
   if (power >=0) {
-    if(absPower > MIN_POWER){
       digitalWrite(Motor::pinA, LOW);
-      digitalWrite(Motor::pinB, HIGH);  
-     
-    }
+      digitalWrite(Motor::pinB, HIGH); 
   } else {
-    if (absPower > MIN_POWER){
       digitalWrite(Motor::pinA, HIGH);
       digitalWrite(Motor::pinB, LOW);
-    }
   }
   
-     
-  if (absPower <= MIN_POWER) {
-    digitalWrite(Motor::pinA, LOW);
-    digitalWrite(Motor::pinB, LOW);  
-  }
-
   ledcWrite(Motor::channel, absPower);
 }
 
