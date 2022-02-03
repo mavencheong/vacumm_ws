@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="vacumm_bot1">
 
   <xacro:property name="base_width" value="0.2"/>
-  <xacro:property name="base_len" value="0.16"/>
+  <xacro:property name="base_len" value="0.185"/>
   <xacro:property name="wheel_radius" value="0.04"/>
   <xacro:property name="base_wheel_gap" value="0.0175"/>
 
@@ -16,9 +16,9 @@
 
 
   <xacro:property name="M_PI" value="3.1415926535897931" />
-  <xacro:property name="cam_px" value="0.025" />
-  <xacro:property name="cam_pz" value="${base_len-0.025}" />
-  <xacro:property name="kinect_cam_py" value="0"/>
+  <xacro:property name="cam_px" value="0.0" />
+  <xacro:property name="cam_pz" value="${base_len-0.0565}" />
+  <xacro:property name="kinect_cam_py" value="0.05"/>
   <xacro:property name="cam_or" value="0" />
   <xacro:property name="cam_op" value="0" />
   <xacro:property name="cam_oy" value="0" />
