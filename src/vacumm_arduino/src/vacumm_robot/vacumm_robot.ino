@@ -5,7 +5,7 @@
 #include <vacumm_hardware/WheelCmd.h>
 #include <vacumm_hardware/WheelState.h>
 
-#define ROS_SERIAL false
+#define ROS_SERIAL true
 
 #define RIGHT_MOTOR_PIN_A 22
 #define RIGHT_MOTOR_PIN_B 23
