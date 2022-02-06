@@ -35,7 +35,7 @@
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
     </node>
 
-    <include file="$(find freenect_launch)/launch/freenect.launch" />
+    <include file="$(find freenect_stack/freenect_launch)/launch/freenect.launch" />
 
     <node name="pointcloud_to_laserscan" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node">
         <remap from="cloud_in" to="/camera/depth/points" />
