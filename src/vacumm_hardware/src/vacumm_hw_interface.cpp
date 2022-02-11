@@ -69,7 +69,7 @@ namespace vacumm_ns
     //   pos_jnt_sat_interface_.enforceLimits(period);
   }
 
-  double VacummHWInterface::ticksToAngle(const int32 &ticks)
+  double VacummHWInterface::ticksToAngle(const int &ticks)
   {
     double angle = (double)ticks * (2.0 * M_PI / 420.0);
     return angle;
