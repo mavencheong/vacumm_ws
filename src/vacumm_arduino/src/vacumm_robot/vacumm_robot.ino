@@ -95,7 +95,7 @@ void set_vel(float left_vel, float right_vel) {
 
   setLeftPID(left_vel);
   setRightPID(right_vel);
-  
+
   left_motor_vel = newLeftVel;
   right_motor_vel = newRightVel;
 
@@ -244,6 +244,16 @@ int avg(double pre, double curr) {
   return (pre + curr) / 2;
 }
 
+float twoDec(float value) {
+  int newValue = (int) (value * 100);
+  return float (newValue) / 100;
+}
+
+float leftDiff = 0;
+float leftVel = 0;
+float rightDiff = 0;
+float rightVel = 0;
+
 void loop() {
   // put your main code here, to run repeatedly:
   if (ROS_SERIAL) {
@@ -257,8 +267,8 @@ void loop() {
   if ((millis() - previousMillis) > INTERVAL) {
     previousMillis = currentMillis;
 
-//    setLeftPID(left_motor_vel);
-//    setRightPID(right_motor_vel);
+    //    setLeftPID(left_motor_vel);
+    //    setRightPID(right_motor_vel);
 
     noInterrupts();
     left_motor_curr_pulse = left_motor_pulse;
@@ -274,21 +284,39 @@ void loop() {
     right_motor_pre_pulse = right_motor_curr_pulse;
 
 
+    leftVel = left_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER;
     if (left_motor_vel > 0) {
-      left_setpoint = ceil(left_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER) ;
+      left_setpoint = ceil(leftVel);
+      leftDiff = left_setpoint - leftVel;
     } else {
-      left_setpoint = floor(left_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER) ;
+      left_setpoint = floor(leftVel);
+      leftDiff = leftVel - left_setpoint;
     }
 
 
+    rightVel = right_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER;
     if (right_motor_vel > 0) {
-      right_setpoint = ceil(right_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER) ;
+      right_setpoint = ceil(rightVel) ;
+      rightDiff = right_setpoint - rightVel;
     } else {
-      right_setpoint = floor(right_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER) ;
+      right_setpoint = floor(rightVel) ;
+      rightDiff = rightVel - right_setpoint;
     }
 
-    left_motor_act_vel = left_input / VELOCITY_TO_PULSE_MULTIPLIER / WHEEL_RADIUS ;
-    right_motor_act_vel = right_input / VELOCITY_TO_PULSE_MULTIPLIER / WHEEL_RADIUS;
+
+
+    if (left_input >= 0) {
+      left_motor_act_vel = twoDec( ((left_input - leftDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS ) ;
+    } else {
+      left_motor_act_vel = twoDec( ((left_input + leftDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS ) ;
+    }
+
+    if (right_input >=0) {
+      right_motor_act_vel = twoDec(((right_input - rightDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS) ;
+    } else {
+      right_motor_act_vel = twoDec(((right_input + rightDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS) ;
+    }
+
 
     left_motor_pos = left_motor_curr_pulse * RADS_PER_TICK_COUNT;
     right_motor_pos = right_motor_curr_pulse * RADS_PER_TICK_COUNT;
@@ -306,7 +334,7 @@ void loop() {
     //    } else if (left_output < 0 && abs(left_output) >= 27) {
     //      left_motor_speed = leftMotorPwmAC[47 - (int)abs(left_output)];
     //    } else {
-    left_motor_speed = map (left_output, -45, 45, -200, 255);
+    left_motor_speed = map (left_output, -45, 45, -255, 255);
     //    }
     //
     //    if (right_output > 0 && abs(right_output) >= 26){
@@ -330,7 +358,13 @@ void loop() {
       Serial.print(" ");
       Serial.print(right_input);
       Serial.print(" ");
-      Serial.print(left_ki);
+      Serial.print(left_motor_act_vel);
+      Serial.print(" ");
+      Serial.print(right_motor_act_vel);
+      Serial.print(" ");
+      Serial.print(leftDiff);
+      Serial.print(" ");
+      Serial.print((left_input - leftDiff));
       Serial.println();
 
     }
