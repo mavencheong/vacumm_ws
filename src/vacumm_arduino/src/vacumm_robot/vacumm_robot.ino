@@ -318,8 +318,8 @@ void loop() {
     }
 
 
-    left_motor_pos = left_motor_curr_pulse * RADS_PER_TICK_COUNT;
-    right_motor_pos = right_motor_curr_pulse * RADS_PER_TICK_COUNT;
+    left_motor_pos = left_motor_curr_pulse;// * RADS_PER_TICK_COUNT;
+    right_motor_pos = right_motor_curr_pulse; // * RADS_PER_TICK_COUNT;
 
 
     //
