@@ -54,15 +54,20 @@ long previousMillis = 0;
 long no_comm_loop = 0;
 
 //PID Settings
-double right_kp = 0.5, right_ki = 5.5, right_kd = 0.01;
+double right_kp = 0.6, right_ki = 3, right_kd = 0.1;
 double right_input = 0.0, right_output = 0.0, right_setpoint = 0.0;
 
-double left_kp = 0.5, left_ki = 5.5, left_kd = 0.01;
+double left_kp = 0.6, left_ki = 3, left_kd = 0.1;
 double left_input = 0.0, left_output = 0.0, left_setpoint = 0.0;
 
 PID leftMotorPID(&left_input, &left_output, &left_setpoint, left_kp, left_ki, left_kd, DIRECT);
 PID rightMotorPID(&right_input, &right_output, &right_setpoint, right_kp, right_ki, right_kd, DIRECT );
 
+int leftMotorPwm[22] = {255, 207, 187, 172, 159, 147, 136, 127, 117, 110, 100, 90, 82, 76, 68, 61, 53, 46, 41, 35, 25, 10};
+int rightMotorPwm[22] = {178, 166, 154, 143, 134, 125, 117, 109, 100, 94, 87, 81, 74, 67, 61, 55, 49, 43, 37, 32, 25, 10};
+
+int leftMotorPwmAC[21] = { -190, -175, -164, -150, -141, -131, -121, -111, -105, -96, -87, -80,  -72, -65, -60, -53, -44, -38, -30, -26, -10};
+int rightMotorPwmAC[21] = { -255, -215, -195, -176, -162, -149, -138, -128, -118, -111, -103, -95, -88, -81, -75, -68, -60, -54, -46, -41, -30};
 
 
 //Motor
@@ -84,8 +89,47 @@ void wheel_cmd_callback(const vacumm_hardware::WheelCmd& wheelCmd) {
 
 void set_vel(float left_vel, float right_vel) {
   no_comm_loop = 0;
-  left_motor_vel = left_vel * WHEEL_RADIUS;
-  right_motor_vel = right_vel * WHEEL_RADIUS;
+
+  float newLeftVel = left_vel * WHEEL_RADIUS;
+  float newRightVel = right_vel * WHEEL_RADIUS;
+
+  setLeftPID(left_vel);
+  setRightPID(right_vel);
+  
+  left_motor_vel = newLeftVel;
+  right_motor_vel = newRightVel;
+
+
+}
+
+void setLeftPID(float vel) {
+  int absVel = abs(vel);
+  if (absVel >= 3.0 || absVel == 0.0) {
+    left_kp = 0.6;
+    left_ki = 3;
+    left_kd = 0.1;
+  } else {
+    left_kp = 1;
+    left_ki = 1.7;
+    left_kd = 0.1;
+  }
+
+  leftMotorPID.SetTunings(left_kp, left_ki, left_kd);
+}
+
+void setRightPID(float vel) {
+  int absVel = abs(vel);
+  if (absVel >= 3.0 || absVel == 0.0) {
+    right_kp = 0.6;
+    right_ki = 3;
+    right_kd = 0.1;
+  } else {
+    right_kp = 1;
+    right_ki = 1.7;
+    right_kd = 0.1;
+  }
+
+  rightMotorPID.SetTunings(right_kp, right_ki, right_kd);
 }
 
 
@@ -96,6 +140,7 @@ ros::Subscriber<vacumm_hardware::WheelCmd> wheel_cmd_sub("/vacumm/wheel_cmd", &w
 void drive(int leftSpeed, int rightSpeed) {
   leftMotor.rotate(leftSpeed);
   rightMotor.rotate(rightSpeed);
+
 }
 
 void flashLED(int times) {
@@ -135,6 +180,7 @@ void IRAM_ATTR right_motor_encoder_callback() {
   } else {
     right_motor_pulse--;
   }
+
 }
 
 void IRAM_ATTR left_motor_encoder_callback() {
@@ -161,11 +207,11 @@ void setup() {
   attachInterrupt(leftMotor.encoderPinA, left_motor_encoder_callback, RISING);
 
   rightMotorPID.SetMode(AUTOMATIC);
-  rightMotorPID.SetSampleTime(INTERVAL);
+  rightMotorPID.SetSampleTime(95);
   rightMotorPID.SetOutputLimits(-45, 45); // max tick that it can go at 1000 ms (0.299 * 47 ticks)
   ////
   leftMotorPID.SetMode(AUTOMATIC);
-  leftMotorPID.SetSampleTime(INTERVAL);
+  leftMotorPID.SetSampleTime(95);
   leftMotorPID.SetOutputLimits(-45, 45);
 
   drive(0, 0); //reset speed to 0;
@@ -190,6 +236,14 @@ void setup() {
   //  drive(255, 255);
 }
 
+int avg(double pre, double curr) {
+  if (pre == 0) {
+    pre = curr;
+  }
+
+  return (pre + curr) / 2;
+}
+
 void loop() {
   // put your main code here, to run repeatedly:
   if (ROS_SERIAL) {
@@ -203,34 +257,67 @@ void loop() {
   if ((millis() - previousMillis) > INTERVAL) {
     previousMillis = currentMillis;
 
+//    setLeftPID(left_motor_vel);
+//    setRightPID(right_motor_vel);
+
+    noInterrupts();
     left_motor_curr_pulse = left_motor_pulse;
     right_motor_curr_pulse = right_motor_pulse;
-
-    left_input = left_motor_curr_pulse - left_motor_pre_pulse;
-    right_input = right_motor_curr_pulse - right_motor_pre_pulse;
-
-
+    interrupts();
+    left_input = avg(left_input, left_motor_curr_pulse - left_motor_pre_pulse);
+    right_input = avg(right_input, right_motor_curr_pulse - right_motor_pre_pulse);
+    //
+    //    left_input = constrain(left_input, -45, 45);
+    //    right_input = constrain(right_input, -45, 45);
+    //
     left_motor_pre_pulse = left_motor_curr_pulse;
     right_motor_pre_pulse = right_motor_curr_pulse;
 
 
-    left_setpoint = left_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER ;
-    right_setpoint = right_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER ;
+    if (left_motor_vel > 0) {
+      left_setpoint = ceil(left_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER) ;
+    } else {
+      left_setpoint = floor(left_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER) ;
+    }
+
+
+    if (right_motor_vel > 0) {
+      right_setpoint = ceil(right_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER) ;
+    } else {
+      right_setpoint = floor(right_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER) ;
+    }
 
     left_motor_act_vel = left_input / VELOCITY_TO_PULSE_MULTIPLIER / WHEEL_RADIUS ;
     right_motor_act_vel = right_input / VELOCITY_TO_PULSE_MULTIPLIER / WHEEL_RADIUS;
 
-    left_motor_pos = left_motor_pulse * RADS_PER_TICK_COUNT;
-    right_motor_pos = right_motor_pulse * RADS_PER_TICK_COUNT;
+    left_motor_pos = left_motor_curr_pulse * RADS_PER_TICK_COUNT;
+    right_motor_pos = right_motor_curr_pulse * RADS_PER_TICK_COUNT;
 
 
-
+    //
     leftMotorPID.Compute();
     rightMotorPID.Compute();
 
+    //    left_output = left_setpoint;
+    //    right_output = right_setpoint;
+    //
+    //    if (left_output > 0 && abs(left_output) >= 26) {
+    //      left_motor_speed = leftMotorPwm[47 -(int)abs(left_output)];
+    //    } else if (left_output < 0 && abs(left_output) >= 27) {
+    //      left_motor_speed = leftMotorPwmAC[47 - (int)abs(left_output)];
+    //    } else {
     left_motor_speed = map (left_output, -45, 45, -200, 255);
-    right_motor_speed = map(right_output, -45, 45, -255, 190);
+    //    }
+    //
+    //    if (right_output > 0 && abs(right_output) >= 26){
+    //      right_motor_speed = rightMotorPwm[47 - (int)abs(right_output)];
+    //    } else if (right_output < 0 && abs(right_output) >= 27){
+    //      right_motor_speed = rightMotorPwmAC[47 - (int)abs(right_output)];
+    //    } else {
+    right_motor_speed = map(right_output, -45, 45, -255, 255);
+    //    }
 
+    //    drive(left_output, right_output);
     drive(left_motor_speed, right_motor_speed);
 
 
@@ -243,7 +330,7 @@ void loop() {
       Serial.print(" ");
       Serial.print(right_input);
       Serial.print(" ");
-      Serial.print(left_motor_pos);
+      Serial.print(left_ki);
       Serial.println();
 
     }
@@ -266,6 +353,8 @@ void loop() {
     }
 
   }
+
+  delay(1);
 }
 
 
@@ -314,8 +403,11 @@ void readCommand() {
       left_kd = value;
       leftMotorPID.SetTunings(left_kp, left_ki, left_kd);
     } else if (command.substring(0, 1).equals("s")) {
-      double value = command.substring(1).toInt();
-      drive(255,  value);
+      int commaIndex = command.indexOf(',');
+      double x = command.substring(1, commaIndex).toDouble();
+      double z = command.substring(commaIndex + 1, command.length()).toDouble();
+      no_comm_loop = 0;
+      drive(x, z);
     }
   }
 }
