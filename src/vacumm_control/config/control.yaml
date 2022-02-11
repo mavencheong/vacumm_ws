@@ -39,9 +39,9 @@ diff_drive_controller:
     # diff_drive_controller will attempt to read either one or both from the
     # URDF if not specified as a parameter
     # cmd_vel_timeout: 0.25
-    velocity_rolling_window_size: 20
-    wheel_separation : 0.235
-    wheel_radius : 0.04
+    # velocity_rolling_window_size: 20
+    # wheel_separation : 0.235
+    # wheel_radius : 0.04
     publish_wheel_joint_controller_state: true
 
     enable_odom_tf : true
