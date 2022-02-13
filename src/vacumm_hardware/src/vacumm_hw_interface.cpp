@@ -24,13 +24,17 @@ namespace vacumm_ns
       const vacumm_hardware::WheelState::ConstPtr &msg)
   {
 
-    wheel_state = msg;
+    for (int i = 0; i < num_joints_; i++)
+    {
+      wheel_pos[i] = wheel_state->pos[i];
+    }
   }
 
   void VacummHWInterface::init()
   {
     // Call parent class version of this function
     GenericHWInterface::init();
+    wheel_pos.resize(num_joints_, 0);
 
     ROS_INFO("VacummHWInterface Ready.");
   }
@@ -43,7 +47,7 @@ namespace vacumm_ns
     double wheel_angles_delta[2];
     for (int i = 0; i < num_joints_; i++)
     {
-      wheel_angles[i] = ticksToAngle(wheel_state->pos[i]);
+      wheel_angles[i] = ticksToAngle(wheel_pos[i]);
 
       wheel_angles_delta[i] = wheel_angles[i] - joint_position_[i];
 
