@@ -23,17 +23,8 @@ namespace vacumm_ns
   void VacummHWInterface::wheelStateCallback(
       const vacumm_hardware::WheelState::ConstPtr &msg)
   {
-    double wheel_angles[2];
-    double wheel_angles_delta[2];
-    for (int i = 0; i < num_joints_; i++)
-    {
-      wheel_angles[i] = ticksToAngle(msg->pos[i]);
 
-      wheel_angles_delta[i] = wheel_angles[i] - joint_position_[i];
-
-      joint_velocity_[i] = msg->vel[i];
-      joint_position_[i] += wheel_angles_delta[i];
-    }
+    wheel_state = msg;
   }
 
   void VacummHWInterface::init()
@@ -47,6 +38,18 @@ namespace vacumm_ns
   void VacummHWInterface::read(ros::Duration &elapsed_time)
   {
     // No need to read since our write() command populates our state for us
+
+    double wheel_angles[2];
+    double wheel_angles_delta[2];
+    for (int i = 0; i < num_joints_; i++)
+    {
+      wheel_angles[i] = ticksToAngle(wheel_state->pos[i]);
+
+      wheel_angles_delta[i] = wheel_angles[i] - joint_position_[i];
+
+      joint_velocity_[i] = wheel_angles_delta[i] / elapsed_time.toSec();
+      joint_position_[i] += wheel_angles_delta[i];
+    }
   }
 
   void VacummHWInterface::write(ros::Duration &elapsed_time)
