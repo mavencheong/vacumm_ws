@@ -26,7 +26,7 @@ namespace vacumm_ns
 
     for (int i = 0; i < num_joints_; i++)
     {
-      wheel_pos[i] = wheel_state->pos[i];
+      wheel_pos[i] = msg->pos[i];
     }
   }
 
