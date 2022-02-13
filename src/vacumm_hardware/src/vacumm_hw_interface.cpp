@@ -23,10 +23,16 @@ namespace vacumm_ns
   void VacummHWInterface::wheelStateCallback(
       const vacumm_hardware::WheelState::ConstPtr &msg)
   {
-
+    double wheel_angles[2];
+    double wheel_angles_delta[2];
     for (int i = 0; i < num_joints_; i++)
     {
-      wheel_pos[i] = msg->pos[i];
+      wheel_angles[i] = ticksToAngle(msg->pos[i]);
+
+      wheel_angles_delta[i] = wheel_angles[i] - joint_position_[i];  
+
+      joint_velocity_[i] = msg->vel[i];
+      joint_position_[i] += wheel_angles_delta[i] ;
     }
   }
 
@@ -34,7 +40,6 @@ namespace vacumm_ns
   {
     // Call parent class version of this function
     GenericHWInterface::init();
-    wheel_pos.resize(num_joints_, 0);
 
     ROS_INFO("VacummHWInterface Ready.");
   }
@@ -42,18 +47,6 @@ namespace vacumm_ns
   void VacummHWInterface::read(ros::Duration &elapsed_time)
   {
     // No need to read since our write() command populates our state for us
-
-    double wheel_angles[2];
-    double wheel_angles_delta[2];
-    for (int i = 0; i < num_joints_; i++)
-    {
-      wheel_angles[i] = ticksToAngle(wheel_pos[i]);
-
-      wheel_angles_delta[i] = wheel_angles[i] - joint_position_[i];
-
-      joint_velocity_[i] = wheel_angles_delta[i] / elapsed_time.toSec();
-      joint_position_[i] += wheel_angles_delta[i];
-    }
   }
 
   void VacummHWInterface::write(ros::Duration &elapsed_time)
@@ -76,7 +69,7 @@ namespace vacumm_ns
     //   pos_jnt_sat_interface_.enforceLimits(period);
   }
 
-  double VacummHWInterface::ticksToAngle(const int &ticks)
+  double VacummHWInterface::ticksToAngle(const int32 &ticks)
   {
     double angle = (double)ticks * (2.0 * M_PI / 420.0);
     return angle;

@@ -31,8 +31,7 @@ public:
 protected:
   ros::Subscriber wheel_state_sub;
   ros::Publisher wheel_cmd_pub;
-
-  std::vector<int> wheel_pos;
+  
   void wheelStateCallback(const vacumm_hardware::WheelState::ConstPtr &msg);
   double ticksToAngle(const int &ticks);
 }; // class
