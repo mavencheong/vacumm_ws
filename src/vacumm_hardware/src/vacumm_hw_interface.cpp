@@ -50,8 +50,8 @@ namespace vacumm_ns
     // No need to read since our write() command populates our state for us
     for (int i = 0; i < num_joints_; i++)
     {
-      cmd.vel[i] = joint_velocity_command_[i];
-      cmd.pos[i] += joint_position_command_[i] *  cmd_dt;
+      joint_velocity_[i]  = joint_velocity_command_[i];
+      joint_position_[i] += joint_position_command_[i] *  cmd_dt;
     }
   }
 
