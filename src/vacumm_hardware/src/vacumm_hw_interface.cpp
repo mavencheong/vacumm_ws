@@ -46,13 +46,8 @@ namespace vacumm_ns
 
   void VacummHWInterface::read(ros::Duration &elapsed_time)
   {
-    const double cmd_dt(elapsed_time.toSec());
     // No need to read since our write() command populates our state for us
-    for (int i = 0; i < num_joints_; i++)
-    {
-      joint_velocity_[i]  = joint_velocity_command_[i];
-      joint_position_[i] += joint_position_command_[i] *  cmd_dt;
-    }
+    
   }
 
   void VacummHWInterface::write(ros::Duration &elapsed_time)

@@ -5,7 +5,7 @@
 #include <vacumm_hardware/WheelCmd.h>
 #include <vacumm_hardware/WheelState.h>
 
-#define ROS_SERIAL false
+#define ROS_SERIAL true
 
 #define RIGHT_MOTOR_PIN_A 22
 #define RIGHT_MOTOR_PIN_B 23
@@ -54,10 +54,10 @@ long previousMillis = 0;
 long no_comm_loop = 0;
 
 //PID Settings
-double right_kp = 20, right_ki = 0, right_kd = 0.1;
+double right_kp = 0.6, right_ki = 3, right_kd = 0.1;
 double right_input = 0.0, right_output = 0.0, right_setpoint = 0.0;
 
-double left_kp = 5, left_ki = 1, left_kd = 0.01;
+double left_kp = 0.6, left_ki = 3, left_kd = 0.1;
 double left_input = 0.0, left_output = 0.0, left_setpoint = 0.0;
 
 PID leftMotorPID(&left_input, &left_output, &left_setpoint, left_kp, left_ki, left_kd, DIRECT);
@@ -207,12 +207,12 @@ void setup() {
   attachInterrupt(leftMotor.encoderPinA, left_motor_encoder_callback, RISING);
 
   rightMotorPID.SetMode(AUTOMATIC);
-  rightMotorPID.SetSampleTime(1);
-  rightMotorPID.SetOutputLimits(-255, 255); // max tick that it can go at 1000 ms (0.299 * 47 ticks)
+  rightMotorPID.SetSampleTime(95);
+  rightMotorPID.SetOutputLimits(-45, 45); // max tick that it can go at 1000 ms (0.299 * 47 ticks)
   ////
   leftMotorPID.SetMode(AUTOMATIC);
-  leftMotorPID.SetSampleTime(1);
-  leftMotorPID.SetOutputLimits(-255, 255);
+  leftMotorPID.SetSampleTime(95);
+  leftMotorPID.SetOutputLimits(-45, 45);
 
   drive(0, 0); //reset speed to 0;
 
@@ -264,7 +264,7 @@ void loop() {
 
   currentMillis = millis();
 
-//  if ((millis() - previousMillis) > INTERVAL) {
+  if ((millis() - previousMillis) > INTERVAL) {
     previousMillis = currentMillis;
 
     //    setLeftPID(left_motor_vel);
@@ -274,8 +274,8 @@ void loop() {
     left_motor_curr_pulse = left_motor_pulse;
     right_motor_curr_pulse = right_motor_pulse;
     interrupts();
-    left_input = left_motor_curr_pulse;  // avg(left_input, left_motor_curr_pulse - left_motor_pre_pulse);
-    right_input = right_motor_curr_pulse;// avg(right_input, right_motor_curr_pulse - right_motor_pre_pulse);
+    left_input = avg(left_input, left_motor_curr_pulse - left_motor_pre_pulse);
+    right_input = avg(right_input, right_motor_curr_pulse - right_motor_pre_pulse);
     //
     //    left_input = constrain(left_input, -45, 45);
     //    right_input = constrain(right_input, -45, 45);
@@ -284,40 +284,40 @@ void loop() {
     right_motor_pre_pulse = right_motor_curr_pulse;
 
 
-//    leftVel = left_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER;
-//    if (left_motor_vel > 0) {
-//      left_setpoint = ceil(leftVel);
-//      leftDiff = left_setpoint - leftVel;
-//    } else {
-//      left_setpoint = floor(leftVel);
-//      leftDiff = leftVel - left_setpoint;
-//    }
-//
-//
-//    rightVel = right_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER;
-//    if (right_motor_vel > 0) {
-//      right_setpoint = ceil(rightVel) ;
-//      rightDiff = right_setpoint - rightVel;
-//    } else {
-//      right_setpoint = floor(rightVel) ;
-//      rightDiff = rightVel - right_setpoint;
-//    }
-//
-//
-//
-//    if (left_input >= 0) {
-//      left_motor_act_vel = twoDec( ((left_input - leftDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS ) ;
-//    } else {
-//      left_motor_act_vel = twoDec( ((left_input + leftDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS ) ;
-//    }
-//
-//    if (right_input >=0) {
-//      right_motor_act_vel = twoDec(((right_input - rightDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS) ;
-//    } else {
-//      right_motor_act_vel = twoDec(((right_input + rightDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS) ;
-//    }
+    leftVel = left_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER;
+    if (left_motor_vel > 0) {
+      left_setpoint = ceil(leftVel);
+      leftDiff = left_setpoint - leftVel;
+    } else {
+      left_setpoint = floor(leftVel);
+      leftDiff = leftVel - left_setpoint;
+    }
 
-  
+
+    rightVel = right_motor_vel * VELOCITY_TO_PULSE_MULTIPLIER;
+    if (right_motor_vel > 0) {
+      right_setpoint = ceil(rightVel) ;
+      rightDiff = right_setpoint - rightVel;
+    } else {
+      right_setpoint = floor(rightVel) ;
+      rightDiff = rightVel - right_setpoint;
+    }
+
+
+
+    if (left_input >= 0) {
+      left_motor_act_vel = twoDec( ((left_input - leftDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS ) ;
+    } else {
+      left_motor_act_vel = twoDec( ((left_input + leftDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS ) ;
+    }
+
+    if (right_input >=0) {
+      right_motor_act_vel = twoDec(((right_input - rightDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS) ;
+    } else {
+      right_motor_act_vel = twoDec(((right_input + rightDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS) ;
+    }
+
+
     left_motor_pos = left_motor_curr_pulse;// * RADS_PER_TICK_COUNT;
     right_motor_pos = right_motor_curr_pulse; // * RADS_PER_TICK_COUNT;
 
@@ -345,8 +345,13 @@ void loop() {
     right_motor_speed = map(right_output, -45, 45, -255, 255);
     //    }
 
-        drive(left_output, right_output);
-//    drive(left_motor_speed, right_motor_speed);
+    if (left_motor_vel == 0 && right_motor_vel == 0){
+      drive(0, 0);
+    } else {
+      drive(left_motor_speed, right_motor_speed);  
+    }
+    //    drive(left_output, right_output);
+    
 
 
     if (!ROS_SERIAL) {
@@ -358,28 +363,31 @@ void loop() {
       Serial.print(" ");
       Serial.print(right_input);
       Serial.print(" ");
+      Serial.print(left_motor_pos);
+      Serial.print(" ");
+      Serial.print(right_motor_pos);
       Serial.println();
 
     }
 
 
-//    if (no_comm_loop > NO_COMM_MAX) {
-//      left_motor_vel = 0;
-//      right_motor_vel = 0;
-//      drive(0, 0);
-//    }
-//
-//    no_comm_loop++;
-//
-//    if (no_comm_loop == 65535) {
-//      no_comm_loop = NO_COMM_MAX;
-//    }
+    if (no_comm_loop > NO_COMM_MAX) {
+      left_motor_vel = 0;
+      right_motor_vel = 0;
+      drive(0, 0);
+    }
+
+    no_comm_loop++;
+
+    if (no_comm_loop == 65535) {
+      no_comm_loop = NO_COMM_MAX;
+    }
 
     if (ROS_SERIAL) {
       publish_wheel_state();
     }
 
-//  }
+  }
 
   delay(1);
 }
@@ -435,14 +443,6 @@ void readCommand() {
       double z = command.substring(commaIndex + 1, command.length()).toDouble();
       no_comm_loop = 0;
       drive(x, z);
-    }else if (command.substring(0, 1).equals("z")) {
-      int commaIndex = command.indexOf(',');
-      double x = command.substring(1, commaIndex).toDouble();
-      double z = command.substring(commaIndex + 1, command.length()).toDouble();
-      no_comm_loop = 0;
-      //drive(x, z);
-      left_setpoint = x;
-      right_setpoint = z;
     }
   }
 }
