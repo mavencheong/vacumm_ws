@@ -34,7 +34,7 @@ namespace vacumm_ns
       wheel_angles_delta[i] = wheel_angles[i] - joint_position_[i];  
 
       joint_velocity_[i] = msg->vel[i];
-      joint_position_[i] += wheel_angles_delta[i] ;
+      joint_position_[i] = wheel_angles[i] ;
     }
   }
 
