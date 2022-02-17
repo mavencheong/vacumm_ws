@@ -18,6 +18,8 @@ namespace vacumm_ns
     wheel_cmd_pub =
         nh.advertise<vacumm_hardware::WheelCmd>("/vacumm/wheel_cmd", 3);
     ros::NodeHandle rpnh(nh_, "hardware_interface");
+
+    double wheelVel[2];
   }
 
   void VacummHWInterface::wheelStateCallback(
@@ -46,19 +48,26 @@ namespace vacumm_ns
 
   void VacummHWInterface::read(ros::Duration &elapsed_time)
   {
-    // No need to read since our write() command populates our state for us
-    
+
   }
 
   void VacummHWInterface::write(ros::Duration &elapsed_time)
   {
     // Safety
     static vacumm_hardware::WheelCmd cmd;
-
+    const double cmd_dt(elapsed_time.toSec());
+    
     for (int i = 0; i < num_joints_; i++)
     {
       cmd.vel[i] = joint_velocity_command_[i];
-      cmd.pos[i] = joint_position_command_[i];
+      cmd.pos[i] += (joint_velocity_command_[i] * cmd_dt);
+
+      // joint_velocity_[i] = joint_velocity_command_[i];
+      // joint_position_[i] += (joint_velocity_command_[i] * cmd_dt);
+
+
+      // ROS_INFO_STREAM_NAMED(
+      //     name_, "Velocity" << joint_velocity_command_[i]  << ", Elapsed Time: " << cmd_dt << "Position: " << joint_position_[i]  );
     }
     // printCommand();
     wheel_cmd_pub.publish(cmd);

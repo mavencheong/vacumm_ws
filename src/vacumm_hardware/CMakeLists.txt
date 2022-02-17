@@ -63,6 +63,7 @@ add_message_files(
   FILES
   WheelCmd.msg
   WheelState.msg
+  WheelTicksCmd.msg
 )
 
 ## Generate services in the 'srv' folder
