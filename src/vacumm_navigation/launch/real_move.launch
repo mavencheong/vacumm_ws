@@ -20,15 +20,20 @@
 
     <include file="$(find freenect_launch)/launch/freenect.launch" />
 
-    <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
+    <!-- <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
         <remap from="image" to="/camera/depth/image_raw"/>
         <remap from="camera_info" to="/camera/rgb/camera_info"/>
         <remap from="scan" to="/camera/scan"/>
         <param name="range_max" type="double" value="4"/>
         <param name="output_frame_id" value="camera_link"/>
+    </node> -->
+
+    <node name="pointcloud_to_laserscan" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node">
+        <remap from="cloud_in" to="/camera/depth/points" />
+        <remap from="scan" to="/camera/scan" />
+        <param name="target_frame" type="str" value="camera_link"/>
     </node>
-
-
+    
     <node name="ros_serial_node" pkg="rosserial_python" type="serial_node.py" output="screen">
         <param name="port" type="string" value="/dev/ttyUSB0"/>
         <param name="baud" type="int" value="115200"/>
