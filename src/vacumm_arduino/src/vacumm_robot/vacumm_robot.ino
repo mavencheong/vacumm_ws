@@ -4,7 +4,7 @@
 #include <ros.h>
 #include <vacumm_hardware/WheelCmd.h>
 #include <vacumm_hardware/WheelState.h>
-
+#include <vacumm_hardware/VacummDiag.h>
 #define ROS_SERIAL true
 
 #define RIGHT_MOTOR_PIN_A 22
@@ -79,8 +79,11 @@ Motor rightMotor(RIGHT_MOTOR_PIN_A, RIGHT_MOTOR_PIN_B, RIGHT_MOTOR_ENCODER_A, RI
 ros::NodeHandle nh;
 vacumm_hardware::WheelCmd wheel_cmd;
 vacumm_hardware::WheelState wheel_state;
-
+vacumm_hardware::VacummDiag vacumm_diag;
 ros::Publisher wheel_state_pub("/vacumm/wheel_state", &wheel_state);
+
+
+ros::Publisher vacumm_diag_pub("/vacumm/diag", &vacumm_diag);
 
 
 void wheel_cmd_callback(const vacumm_hardware::WheelCmd& wheelCmd) {
@@ -230,6 +233,7 @@ void setup() {
     nh.getHardware()->setBaud(115200);
     nh.initNode();
     nh.advertise(wheel_state_pub);
+    nh.advertise(vacumm_diag_pub);
     nh.subscribe(wheel_cmd_sub);
   }
 
@@ -253,7 +257,7 @@ float leftDiff = 0;
 float leftVel = 0;
 float rightDiff = 0;
 float rightVel = 0;
-
+char buffers[100];
 void loop() {
   // put your main code here, to run repeatedly:
   if (ROS_SERIAL) {
@@ -368,6 +372,9 @@ void loop() {
       Serial.print(right_motor_pos);
       Serial.println();
 
+    } else {
+      
+     
     }
 
 
@@ -400,6 +407,16 @@ void publish_wheel_state() {
   wheel_state.pos[1] = right_motor_pos;
 
   wheel_state_pub.publish(&wheel_state);
+
+
+  vacumm_diag.left_setpoint = left_setpoint;
+  vacumm_diag.right_setpoint = right_setpoint;
+  vacumm_diag.left_input = left_input;
+  vacumm_diag.right_input = right_input;
+  vacumm_diag.left_output = left_output;
+  vacumm_diag.right_output = right_output;
+
+  vacumm_diag_pub.publish(&vacumm_diag);
   nh.spinOnce();
 }
 
