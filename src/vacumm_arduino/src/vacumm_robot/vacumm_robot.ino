@@ -415,7 +415,8 @@ void publish_wheel_state() {
   vacumm_diag.right_input = right_input;
   vacumm_diag.left_output = left_output;
   vacumm_diag.right_output = right_output;
-
+  vacumm_diag.left_pulse = left_motor_curr_pulse;
+  vacumm_diag.right_pulse = right_motor_curr_pulse;
   vacumm_diag_pub.publish(&vacumm_diag);
   nh.spinOnce();
 }
