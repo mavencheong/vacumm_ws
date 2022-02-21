@@ -4,3 +4,5 @@ float64 left_input
 float64 right_input
 float64 left_output
 float64 right_output
+float64 left_pulse
+float64 right_pulse
