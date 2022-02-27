@@ -19,7 +19,7 @@
     <arg name="wait_for_transform" default="0.2"/>
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find vacumm_description)/rviz/vacumm.rviz"/>
-    <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen" args="_speed:=0.25 _turn:=1">
+    <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen" args="_speed:=0.25 _turn:=0.8">
         <remap from="cmd_vel" to="diff_drive_controller/cmd_vel" />
     </node>
 

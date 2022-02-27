@@ -16,7 +16,7 @@
     <arg unless="$(arg simulation)" name="depth_topic" default="/camera/depth_registered/image_raw"/>
     <arg name="camera_info_topic" default="/camera/rgb/camera_info"/>
 
-    <arg name="wait_for_transform" default="0.2"/>
+    <arg name="wait_for_transform" default="1"/>
 
 
     <node name="rtabmap" pkg="rtabmap_ros" type="rtabmap" output="screen" args="$(arg args)">
@@ -72,6 +72,8 @@
     </node> -->
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find vacumm_description)/rviz/vacumm.rviz"/>
-
+    <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen" args="_speed:=0.2 _turn:=1">
+        <remap from="cmd_vel" to="diff_drive_controller/cmd_vel" />
+    </node>
 </launch>
 
