@@ -6,3 +6,5 @@ float64 left_output
 float64 right_output
 float64 left_pulse
 float64 right_pulse
+float64 left_vel
+float64 right_vel
