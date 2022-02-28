@@ -2,7 +2,7 @@
 <launch>
 
 
-    <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm5.xacro'
+    <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm4.xacro'
         --inorder " />
 
 
