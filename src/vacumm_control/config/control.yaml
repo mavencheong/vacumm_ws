@@ -46,7 +46,7 @@ diff_drive_controller:
     #0.042925
     publish_wheel_joint_controller_state: true
 
-    enable_odom_tf : true
+    enable_odom_tf : false
 
     # enable_odom_tf: true
 

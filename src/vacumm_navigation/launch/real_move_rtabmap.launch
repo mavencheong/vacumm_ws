@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+
+    <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm5.xacro'
+        --inorder " />
+
+
+    <rosparam command="load" file="$(find vacumm_control)/config/control.yaml" />
+
+    <!-- Load hardware interface -->
+    <node name="vacumm_hw_main" pkg="vacumm_hardware" type="vacumm_hw_main" output="screen"/>
+
+    <node name="base_controller_spawner" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args=" spawn  
+                    joint_state_controller 
+                    diff_drive_controller "/>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    </node>
+
+    <include file="$(find freenect_launch)/launch/freenect.launch">
+        <arg name="depth_registration" value="true" />
+    </include>
+
+    <!-- <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage5_to_laserscan">
+        <remap from="image" to="/camera/depth/image_raw"/>
+        <remap from="camera_info" to="/camera/rgb/camera_info"/>
+        <remap from="scan" to="/camera/scan"/>
+        <param name="range_max" type="double" value="4"/>
+        <param name="output_frame_id" value="camera_link"/>
+    </node> -->
+
+
+    <group ns="camera">
+        <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="load rtabmap_ros/rgbd_sync camera_nodelet_manager" output="screen">
+            <param name="compressed_rate" type="double" value="5"/>
+            <param name="approx_sync" type="bool" value="true"/>
+
+            <remap from="rgb/image" to="rgb/image_rect_color"/>
+            <remap from="depth/image" to="depth_registered/image_raw"/>
+            <remap from="rgb/camera_info" to="rgb/camera_info"/>
+
+            <remap from="rgbd_image" to="rgbd_image"/>
+        </node>
+
+
+        <node pkg="nodelet" type="nodelet" name="data_throttle" args="load rtabmap_ros/data_throttle camera_nodelet_manager" output="screen">
+            <param name="rate" type="double" value="5"/>
+            <param name="approx_sync" type="bool" value="true"/>
+
+            <remap from="rgb/image_in" to="rgb/image_rect_color"/>
+            <remap from="depth/image_in" to="depth_registered/image_raw"/>
+            <remap from="rgb/camera_info_in" to="rgb/camera_info"/>
+
+            <remap from="rgb/image_out" to="throttled/rgb/image_rect_color"/>
+            <remap from="depth/image_out" to="throttled/depth_registered/image_raw"/>
+            <remap from="rgb/camera_info_out" to="throttled/rgb/camera_info"/>
+        </node>
+
+        <node name="pointcloud_to_laserscan" pkg="nodelet" type="nodelet" args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet camera_nodelet_manager" output="screen">
+            <remap from="cloud_in" to="depth_registered/points" />
+            <!-- <remap from="scan" to="/scan" /> -->
+            <param name="target_frame" type="str" value="camera_link"/>
+        </node>
+    </group>
+
+
+
+    <node name="ros_serial_node" pkg="rosserial_python" type="serial_node.py" output="screen">
+        <param name="port" type="string" value="/dev/ttyUSB0"/>
+        <param name="baud" type="int" value="115200"/>
+    </node>
+
+
+
+</launch>
