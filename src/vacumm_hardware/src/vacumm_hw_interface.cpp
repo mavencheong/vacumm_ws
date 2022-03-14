@@ -26,10 +26,12 @@ namespace vacumm_ns
       const vacumm_hardware::WheelState::ConstPtr &msg)
   {
     double wheel_angles[2];
+    double wheel_degrees[2];
     double wheel_angles_delta[2];
     for (int i = 0; i < num_joints_; i++)
     {
-      wheel_angles[i] = ticksToAngle(msg->pos[i]);
+      wheel_degrees[i] = ticksToDegree(msg->pos[i]);
+      wheel_angles[i] = degreeToAngles(wheel_degrees[i]);
 
       wheel_angles_delta[i] = wheel_angles[i] - joint_position_[i];  
 
@@ -83,6 +85,17 @@ namespace vacumm_ns
   {
     double angle = (double)ticks * (2.0 * M_PI / 420.0);
     return angle;
+  }
+
+  double VacummHWInterface::ticksToDegree(const int &ticks)
+  {
+    double angle = (360/420.0)*ticks;
+    return angle;
+  }
+
+  double VacummHWInterface::degreeToAngles(const double &degree)
+  {
+    return degree * M_PI / 180;
   }
 
 } // namespace vacumm_ns

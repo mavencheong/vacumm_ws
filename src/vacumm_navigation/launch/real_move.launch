@@ -2,7 +2,7 @@
 <launch>
 
 
-    <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm5.xacro'
+    <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm7.xacro'
         --inorder " />
 
 
@@ -18,7 +18,9 @@
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
     </node>
 
-    <include file="$(find freenect_launch)/launch/freenect.launch" />
+    <include file="$(find freenect_launch)/launch/freenect.launch">
+        <arg name="publish_tf" default="false"/>
+    </include>
 
     <!-- <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
         <remap from="image" to="/camera/depth/image_raw"/>

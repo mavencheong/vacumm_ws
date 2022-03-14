@@ -34,6 +34,8 @@ protected:
   
   void wheelStateCallback(const vacumm_hardware::WheelState::ConstPtr &msg);
   double ticksToAngle(const int &ticks);
+  double ticksToDegree(const int &ticks);
+  double degreeToAngles(const double &degree);
 }; // class
 
 } // namespace vacumm_ns
