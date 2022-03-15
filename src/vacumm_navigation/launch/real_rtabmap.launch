@@ -19,6 +19,16 @@
     <arg name="wait_for_transform" default="1"/>
 
     <group ns="rtabmap">
+      <include file="$(find rtabmap_ros)/launch/trabmap.launch">
+        <arg name="subscribe_rgbd" value="true" />
+        <arg name="rgbd_topic" value="/camera/rgbd_image" />
+        <arg name="compressed" value="true" />
+        <arg name="rtabmap_args" value="--delete_db_on_start" />
+        <arg name="frame_id" value="base_footprint" />
+    </include>
+    </group>
+
+    <!-- <group ns="rtabmap">
 
         <node name="republish_rgb" type="republish" pkg="image_transport" output="screen" args=" compressed in:=/camera/throttled/rgb/image_rect_color raw out:=/camera/throttled/rgb/image_rect_color_relay" />
         <node name="republish_depth" type="republish" pkg="image_transport" output="screen" args=" compressedDepth in:=/camera/throttled/depth_registered/image_raw raw out:=/camera/throttled/depth_registered/image_raw_relay" />
@@ -94,7 +104,7 @@
             <param unless="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="true"/>
             <param name="Mem/InitWMWithAllNodes" type="string" value="$(arg localization)"/>
         </node>
-    </group>
+    </group> -->
 
     <!-- RGB-D Odometry
     <node pkg="rtabmap_ros" type="rgbd_odometry" name="rgbd_odometry" output="screen">
