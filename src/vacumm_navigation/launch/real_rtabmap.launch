@@ -18,118 +18,24 @@
 
     <arg name="wait_for_transform" default="1"/>
 
-    <group ns="rtabmap">
-      <include file="$(find rtabmap_ros)/launch/trabmap.launch">
+ 
+      <include file="$(find vacumm_navigation)/launch/rtabmap.launch">
         <arg name="subscribe_rgbd" value="true" />
         <arg name="rgbd_topic" value="/camera/rgbd_image" />
         <arg name="compressed" value="true" />
         <arg name="rtabmap_args" value="--delete_db_on_start" />
         <arg name="frame_id" value="base_footprint" />
+        <remap from="scan" to="/camera/scan"/>
+        <remap from="grid_map" to="/map"/>
+        <remap from="scan" to="/camera/scan"/>
+        <remap from="odom" to="/odom"/>
     </include>
-    </group>
-
-    <!-- <group ns="rtabmap">
-
-        <node name="republish_rgb" type="republish" pkg="image_transport" output="screen" args=" compressed in:=/camera/throttled/rgb/image_rect_color raw out:=/camera/throttled/rgb/image_rect_color_relay" />
-        <node name="republish_depth" type="republish" pkg="image_transport" output="screen" args=" compressedDepth in:=/camera/throttled/depth_registered/image_raw raw out:=/camera/throttled/depth_registered/image_raw_relay" />
-
-        <node pkg="nodelet" type="nodelet" name="rgbd_sync" args="standalone rtabmap_ros/rgbd_sync" clear_params="true" output="screen">
-            <remap from="rgb/image" to="/camera/throttled/rgb/image_rect_color_relay"/>
-            <remap from="depth/image" to="/camera/throttled/depth_registered/image_raw_relay"/>
-            <remap from="rgb/camera_info" to="/camera/throttled/rgb/camera_info"/>
-            <remap from="rgbd_image" to="rgbd_image_relay"/>
-            <param name="approx_sync" type="bool" value="true"/>
-            <param name="approx_sync_max_interval" type="double" value="0"/>
-            <param name="queue_size" type="int" value="10"/>
-            <param name="depth_scale" type="double" value="1.0"/>
-            <param name="decimation" type="double" value="1"/>
-        </node>
 
 
-        <node pkg="rtabmap_ros" type="rgbd_odometry" name="rgbd_odometry" clear_params="true" output="screen">
-            <remap from="rgb/image" to="/camera/throttled/rgb/image_rect_color_relay"/>
-            <remap from="depth/image" to="/camera/throttled/depth_registered/image_raw_relay"/>
-            <remap from="rgb/camera_info" to="/camera/throttled/rgb/camera_info"/>
-
-            <param name="frame_id" type="string" value="base_footprint"/>
-            <param name="odom_frame_id" type="string" value="odom"/>
-            <param name="publish_tf" type="bool" value="true"/>
-        </node>
-
-        <node name="rtabmap" pkg="rtabmap_ros" type="rtabmap" output="screen" args="$(arg args)">
-            <param name="database_path" type="string" value="$(arg database_path)"/>
-            <param name="frame_id" type="string" value="base_footprint"/>
-            <param name="wait_for_transform_duration" type="double" value="$(arg wait_for_transform)"/>
-            <param name="subscribe_depth" type="bool" value="true"/>
-            <param name="subscribe_scan" type="bool" value="true"/>
-            <param name="subscribe_rgb" type="bool" value="true"/>
-            <param name="subscribe_rgbd" type="bool" value="true"/>
-            <param name="map_negative_poses_ignored" type="bool" value="true"/>
-
-            <!-- When sending goals on /rtabmap/goal topic, use actionlib to communicate with move_base -->
-            <param name="use_action_for_goal" type="bool" value="true"/>
-            <remap from="move_base" to="/move_base"/>
-
-            <!-- inputs -->
-            <remap from="rgbd_image" to="rgbd_image_relay"/>
-            <remap from="scan" to="/camera/scan"/>
-            <remap from="rgb/image" to="/camera/throttled/rgb/image_rect_color_relay"/>
-            <remap from="depth/image" to="/camera/throttled/depth_registered/image_raw_relay"/>
-            <remap from="rgb/camera_info" to="/camera/throttled/rgb/camera_info"/>
-
-            <!-- Fix odom covariance as in simulation the covariance in /odom topic is high (0.1 for linear and 0.05 for angular) -->
-            <param unless="$(arg rgbd_odometry)" name="odom_frame_id" value="odom"/>
-            <param unless="$(arg rgbd_odometry)" name="odom_tf_linear_variance" value="0.001"/>
-            <param unless="$(arg rgbd_odometry)" name="odom_tf_angular_variance" value="0.001"/>
-
-            <!-- output -->
-            <remap from="grid_map" to="/map"/>
-
-            <param name="RGBD/OptimizeMaxError" type="string" value="0.0"/>
-            <!--<param name="RGBD/OptimizeFromGraphEnd" type="string" value="false"/>-->
-            <param name="RGBD/AngularUpdate" type="string" value="0.1"/>
-            <param name="RGBD/LinearUpdate" type="string" value="0.1"/>
-            <param name="RGBD/LoopClosureReextractFeatures" type="string" value="true"/>
-
-            <param name="Odom/Holonomic" type="string" value="false"/>
-
-            <param name="Grid/FromDepth" type="string" value="false"/>
-
-            <param name="Optimizer/Strategy" type="string" value="1"/>
-            <param name="Optimizer/Robust" type="string" value="true"/>
-            <param name="RGBD/OptimizeMaxError" type="double" value="0"/>
-
-            <!-- localization mode -->
-            <param if="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="false"/>
-            <param unless="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="true"/>
-            <param name="Mem/InitWMWithAllNodes" type="string" value="$(arg localization)"/>
-        </node>
-    </group> -->
-
-    <!-- RGB-D Odometry
-    <node pkg="rtabmap_ros" type="rgbd_odometry" name="rgbd_odometry" output="screen">
-        <remap from="rgb/image" to="/camera/rgb/image_raw"/>
-        <remap from="depth/image" to="/camera/depth/image"/>
-        <remap from="rgb/camera_info" to="/camera/rgb/camera_info"/>
-     
-        <param name="frame_id" type="string" value="base_footprint"/>
-        <param name="odom_frame_id" type="string" value="odom"/>
-        <param name="publish_tf" type="bool" value="true"/>
-     
-    </node> -->
-
-
-
-
-
-
-    <!-- <node pkg="explore_lite" type="explore" respawn="true" name="explore" output="screen">
-        <rosparam file="$(find vacumm_navigation)/config3/exploration.yaml" command="load" />
-    </node> -->
+    
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find vacumm_description)/rviz/vacumm.rviz"/>
     <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen" args="_speed:=0.2 _turn:=1">
         <remap from="cmd_vel" to="diff_drive_controller/cmd_vel" />
     </node>
 </launch>
-
