@@ -23,7 +23,7 @@
 
 #define INTERVAL 100
 #define PWM_CHANNEL 0
-#define NO_COMM_MAX 50
+#define NO_COMM_MAX 30
 const int TICKS_PER_REVOLUTION = 420;
 const double RADS_PER_TICK_COUNT = (2 * PI) / TICKS_PER_REVOLUTION;
 const double WHEEL_RADIUS = 0.04;
@@ -71,8 +71,8 @@ int rightMotorPwmAC[21] = { -255, -215, -195, -176, -162, -149, -138, -128, -118
 
 
 //Motor
-Motor leftMotor(LEFT_MOTOR_PIN_A, LEFT_MOTOR_PIN_B, LEFT_MOTOR_ENCODER_A, LEFT_MOTOR_ENCODER_B, LEFT_MOTOR_ENABLE_PIN, 0);
-Motor rightMotor(RIGHT_MOTOR_PIN_A, RIGHT_MOTOR_PIN_B, RIGHT_MOTOR_ENCODER_A, RIGHT_MOTOR_ENCODER_B, RIGHT_MOTOR_ENABLE_PIN, 1);
+Motor leftMotor(LEFT_MOTOR_PIN_A, LEFT_MOTOR_PIN_B, LEFT_MOTOR_ENCODER_A, LEFT_MOTOR_ENCODER_B, LEFT_MOTOR_ENABLE_PIN, 1);
+Motor rightMotor(RIGHT_MOTOR_PIN_A, RIGHT_MOTOR_PIN_B, RIGHT_MOTOR_ENCODER_A, RIGHT_MOTOR_ENCODER_B, RIGHT_MOTOR_ENABLE_PIN, 2);
 
 
 //ROS
@@ -210,11 +210,11 @@ void setup() {
   attachInterrupt(leftMotor.encoderPinA, left_motor_encoder_callback, RISING);
 
   rightMotorPID.SetMode(AUTOMATIC);
-  rightMotorPID.SetSampleTime(95);
+  rightMotorPID.SetSampleTime(100);
   rightMotorPID.SetOutputLimits(-45, 45); // max tick that it can go at 1000 ms (0.299 * 47 ticks)
   ////
   leftMotorPID.SetMode(AUTOMATIC);
-  leftMotorPID.SetSampleTime(95);
+  leftMotorPID.SetSampleTime(100);
   leftMotorPID.SetOutputLimits(-45, 45);
 
   drive(0, 0); //reset speed to 0;
@@ -366,10 +366,10 @@ void loop() {
       Serial.print(right_setpoint);
       Serial.print(" ");
       Serial.print(right_input);
-      Serial.print(" ");
-      Serial.print(left_motor_pos);
-      Serial.print(" ");
-      Serial.print(right_motor_pos);
+//      Serial.print(" ");
+//      Serial.print(left_motor_pos);
+//      Serial.print(" ");
+//      Serial.print(right_motor_pos);
       Serial.println();
 
     } else {
