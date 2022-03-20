@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+
+    <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm7.xacro'
+        --inorder " />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    </node>
+
+    <!-- <node pkg="tf" type="static_transform_publisher" name="imu_link" args="0 0 0 0 1.57 0 /imu 10"/> -->
+
+    <node name="ros_serial_node" pkg="rosserial_python" type="serial_node.py" output="screen">
+        <param name="port" type="string" value="/dev/ttyUSB0"/>
+        <param name="baud" type="int" value="115200"/>
+    </node>
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find vacumm_description)/rviz/vacumm.rviz"/>
+
+</launch>

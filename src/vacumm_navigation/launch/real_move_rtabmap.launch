@@ -7,7 +7,7 @@
     <arg name="rgbd_sync" default="true"/>
 
 
-    <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm5.xacro'
+    <param name="robot_description" command="$(find xacro)/xacro '$(find vacumm_description)/urdf/vacumm7.xacro'
         --inorder " />
 
 
@@ -25,6 +25,7 @@
 
     <include file="$(find freenect_launch)/launch/freenect.launch">
         <arg name="depth_registration" value="true" />
+        <arg name="publish_tf" default="false"/>
     </include>
 
     <!-- <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage5_to_laserscan">

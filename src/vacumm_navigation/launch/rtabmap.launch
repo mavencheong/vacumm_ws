@@ -436,6 +436,19 @@
       <remap unless="$(arg icp_odometry)" from="scan_cloud" to="$(arg scan_cloud_topic)"/>
       <remap from="scan_descriptor"        to="$(arg scan_descriptor_topic)"/>
       <remap from="odom"                   to="$(arg odom_topic)"/>
+        <param name="RGBD/OptimizeMaxError" type="string" value="0.0"/>
+        <!--<param name="RGBD/OptimizeFromGraphEnd" type="string" value="false"/>-->
+        <param name="RGBD/AngularUpdate" type="string" value="0.1"/>
+        <param name="RGBD/LinearUpdate" type="string" value="0.1"/>
+        <param name="RGBD/LoopClosureReextractFeatures" type="string" value="true"/>
+
+        <param name="Odom/Holonomic" type="string" value="false"/>
+
+        <param name="Grid/FromDepth" type="string" value="false"/>
+
+        <param name="Optimizer/Strategy" type="string" value="1"/>
+        <param name="Optimizer/Robust" type="string" value="true"/>
+        <param name="RGBD/OptimizeMaxError" type="double" value="0"/>
     </node>
   
   </group>

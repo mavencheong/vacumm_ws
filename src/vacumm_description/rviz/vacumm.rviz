@@ -9,6 +9,7 @@ Panels:
         - /TF1/Frames1
         - /TF1/Tree1
         - /LaserScan1
+        - /Map1
         - /Global Map1
         - /Global Map1/Costmap1
         - /Global Map1/Planner1
@@ -16,6 +17,8 @@ Panels:
         - /Local Map1/Costmap1
         - /Local Map1/Planner1
         - /Rtabmap cloud1
+        - /Imu1
+        - /Imu1/Box properties1
       Splitter Ratio: 0.5
     Tree Height: 787
   - Class: rviz/Selection
@@ -96,14 +99,8 @@ Visualization Manager:
           Value: false
         camera_rgb_optical_frame:
           Value: false
-        left_wheel:
-          Value: false
-        map:
+        imu_link:
           Value: true
-        odom:
-          Value: true
-        right_wheel:
-          Value: false
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -111,21 +108,17 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        map:
-          odom:
-            base_footprint:
-              base_link:
-                camera_link:
-                  camera_depth_frame:
-                    camera_depth_optical_frame:
-                      {}
-                  camera_rgb_frame:
-                    camera_rgb_optical_frame:
-                      {}
-                left_wheel:
+        base_footprint:
+          base_link:
+            camera_link:
+              camera_rgb_frame:
+                camera_depth_frame:
+                  camera_depth_optical_frame:
+                    {}
+                camera_rgb_optical_frame:
                   {}
-                right_wheel:
-                  {}
+            imu_link:
+              {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -190,7 +183,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /map
+      Topic: /rtabmap/grid_map
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -325,11 +318,35 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Acceleration properties:
+        Acc. vector alpha: 1
+        Acc. vector color: 255; 0; 0
+        Acc. vector scale: 1
+        Derotate acceleration: true
+        Enable acceleration: false
+      Axes properties:
+        Axes scale: 1
+        Enable axes: true
+      Box properties:
+        Box alpha: 1
+        Box color: 255; 0; 0
+        Enable box: true
+        x_scale: 1
+        y_scale: 1
+        z_scale: 1
+      Class: rviz_imu_plugin/Imu
+      Enabled: true
+      Name: Imu
+      Queue Size: 10
+      Topic: /vacumm/imu
+      Unreliable: false
+      Value: true
+      fixed_frame_orientation: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: odom
+    Fixed Frame: imu_link
     Frame Rate: 30
   Name: root
   Tools:
@@ -349,7 +366,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.885364532470703
+      Distance: 15.221344947814941
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
