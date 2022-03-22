@@ -19,6 +19,7 @@ Panels:
         - /Rtabmap cloud1
         - /Imu1
         - /Imu1/Box properties1
+        - /Imu1/Axes properties1
       Splitter Ratio: 0.5
     Tree Height: 787
   - Class: rviz/Selection
@@ -382,9 +383,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.4147995710372925
+      Pitch: 0.6448002457618713
       Target Frame: base_footprint
-      Yaw: 3.1891708374023438
+      Yaw: 3.084169387817383
     Saved: ~
 Window Geometry:
   Displays:
