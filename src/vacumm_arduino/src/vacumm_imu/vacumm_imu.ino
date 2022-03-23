@@ -213,7 +213,7 @@ void loop() {
 
       if (ROS_SERIAL) {
         imu_msg.header.frame_id = "imu_link";
-        imu_msg.header.stamp = nh.now();
+        imu_msg.header.stamp = nh.now().toSec();;
         //        imu_msg.orientation.y = mpu.getQuaternionX() * -1.0;
         //        imu_msg.orientation.x = mpu.getQuaternionY() * -1.0;
         //        imu_msg.orientation.z = mpu.getQuaternionZ() * -1.0;
@@ -229,7 +229,7 @@ void loop() {
 
 
         mag_msg.header.frame_id = "imu_link";
-        mag_msg.header.stamp = nh.now();
+        mag_msg.header.stamp = nh.now().toSec();
         mag_msg.magnetic_field.x = (float) mx * (float) MAG_SCALE * UTESLA_TO_TESLA;
         mag_msg.magnetic_field.y = (float) my * (float) MAG_SCALE * UTESLA_TO_TESLA;
         mag_msg.magnetic_field.z = (float) mz * (float) MAG_SCALE * UTESLA_TO_TESLA;

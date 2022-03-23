@@ -339,7 +339,7 @@ Visualization Manager:
       Enabled: true
       Name: Imu
       Queue Size: 10
-      Topic: /vacumm/imu
+      Topic: /imu/data
       Unreliable: false
       Value: true
       fixed_frame_orientation: true
@@ -367,7 +367,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 15.221344947814941
+      Distance: 17.04790687561035
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
