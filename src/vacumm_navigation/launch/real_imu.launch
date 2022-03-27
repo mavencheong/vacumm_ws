@@ -16,13 +16,13 @@
 
 
   
-  <node name="apply_calib" pkg="imu_calib" type="apply_calib" output="screen">
+  <!-- <node name="apply_calib" pkg="imu_calib" type="apply_calib" output="screen">
         <remap from="raw" to="/vacumm/imu"/>
         <remap from="corrected" to="/imu/data_raw"/>
         <param name="calib_file" value="$(find vacumm_navigation)/params/imu_calib.yaml" />
         <param name="calibrate_gyros" value="true" />
         
-    </node>
+    </node> -->
 
     <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen" respawn="false" >
         <remap from="/imu/data_raw" to="/vacumm/imu"/>
@@ -31,8 +31,8 @@
         <param name="publish_tf" value="true" />
         <param name="use_magnetic_field_msg" value="false" /> 
         <param name="world_frame" value="enu" />
-        <param name="orientation_stddev" value="0.05" />
-        <param name="publish_debug_topics" value="true"/>
+        <!-- <param name="orientation_stddev" value="0.05" /> -->
+        <!-- <param name="publish_debug_topics" value="true"/> -->
    
         
     </node>
