@@ -9,7 +9,7 @@
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/MagneticField.h>
 
-#define ROS_SERIAL false
+#define ROS_SERIAL true
 
 
 #define ACCEL_SCALE 1 / 16384 // LSB/g

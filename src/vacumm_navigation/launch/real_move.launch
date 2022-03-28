@@ -18,17 +18,15 @@
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
     </node>
 
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">
+            <rosparam command="load" file="$(find vacumm_navigation)/config3/ekf_localization.yaml"/>
+    </node>
+
+
     <include file="$(find freenect_launch)/launch/freenect.launch">
         <arg name="publish_tf" default="false"/>
     </include>
 
-    <!-- <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
-        <remap from="image" to="/camera/depth/image_raw"/>
-        <remap from="camera_info" to="/camera/rgb/camera_info"/>
-        <remap from="scan" to="/camera/scan"/>
-        <param name="range_max" type="double" value="4"/>
-        <param name="output_frame_id" value="camera_link"/>
-    </node> -->
 
     <node name="pointcloud_to_laserscan" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node">
         <remap from="cloud_in" to="/camera/depth/points" />
@@ -41,6 +39,13 @@
         <param name="baud" type="int" value="115200"/>
     </node>
 
-
+    <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen" respawn="false" >
+        <remap from="/imu/data_raw" to="/vacumm/imu"/>
+        <param name="fixed_frame" value="base_footprint" />
+        <param name="use_mag" value="false" />
+        <param name="publish_tf" value="true" />
+        <param name="use_magnetic_field_msg" value="false" /> 
+        <param name="world_frame" value="enu" />
+    </node>
 
 </launch>
