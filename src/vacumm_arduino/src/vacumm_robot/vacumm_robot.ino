@@ -1,3 +1,4 @@
+#include <MPU9250_WE.h>
 
 #include <PID_v1.h>
 #include "Motor.h"
@@ -5,9 +6,21 @@
 #include <vacumm_hardware/WheelCmd.h>
 #include <vacumm_hardware/WheelState.h>
 #include <vacumm_hardware/VacummDiag.h>
-#define ROS_SERIAL true
+#include <sensor_msgs/Imu.h>
+#include <sensor_msgs/MagneticField.h>
 
-#define RIGHT_MOTOR_PIN_A 22
+#define ROS_SERIAL false
+
+
+#define ACCEL_SCALE 1 / 16384 // LSB/g
+#define GYRO_SCALE 1 / 131 // LSB/(deg/s)
+#define MAG_SCALE 0.6 // uT/LSB
+#define G_TO_ACCEL 9.81
+#define MGAUSS_TO_UTESLA 0.1
+#define UTESLA_TO_TESLA 0.000001
+#define MPU9250_ADDR 0x68
+
+#define RIGHT_MOTOR_PIN_A 4
 #define RIGHT_MOTOR_PIN_B 23
 #define RIGHT_MOTOR_ENCODER_A 5
 #define RIGHT_MOTOR_ENCODER_B 18
@@ -70,6 +83,9 @@ int leftMotorPwmAC[21] = { -190, -175, -164, -150, -141, -131, -121, -111, -105,
 int rightMotorPwmAC[21] = { -255, -215, -195, -176, -162, -149, -138, -128, -118, -111, -103, -95, -88, -81, -75, -68, -60, -54, -46, -41, -30};
 
 
+//IMU
+MPU9250_WE myMPU9250 = MPU9250_WE(MPU9250_ADDR);
+
 //Motor
 Motor leftMotor(LEFT_MOTOR_PIN_A, LEFT_MOTOR_PIN_B, LEFT_MOTOR_ENCODER_A, LEFT_MOTOR_ENCODER_B, LEFT_MOTOR_ENABLE_PIN, 1);
 Motor rightMotor(RIGHT_MOTOR_PIN_A, RIGHT_MOTOR_PIN_B, RIGHT_MOTOR_ENCODER_A, RIGHT_MOTOR_ENCODER_B, RIGHT_MOTOR_ENABLE_PIN, 2);
@@ -81,10 +97,12 @@ vacumm_hardware::WheelCmd wheel_cmd;
 vacumm_hardware::WheelState wheel_state;
 vacumm_hardware::VacummDiag vacumm_diag;
 ros::Publisher wheel_state_pub("/vacumm/wheel_state", &wheel_state);
-
-
 ros::Publisher vacumm_diag_pub("/vacumm/diag", &vacumm_diag);
 
+sensor_msgs::Imu imu_msg;
+sensor_msgs::MagneticField mag_msg;
+ros::Publisher mag_pub("/imu/mag", &mag_msg);
+ros::Publisher imu_pub("/vacumm/imu", &imu_msg);
 
 void wheel_cmd_callback(const vacumm_hardware::WheelCmd& wheelCmd) {
   set_vel(wheelCmd.vel[0], wheelCmd.vel[1]);
@@ -196,13 +214,28 @@ void IRAM_ATTR left_motor_encoder_callback() {
 
 }
 
-
+void logInfo(char msg[]) {
+  if (ROS_SERIAL) {
+    nh.loginfo(msg);
+  } else {
+    Serial.println(msg);
+  }
+}
 
 void setup() {
 
   if (!ROS_SERIAL) {
     Serial.begin(115200);
+  } else {
+    nh.getHardware()->setBaud(115200);
+    nh.initNode();
+    nh.advertise(wheel_state_pub);
+    nh.advertise(vacumm_diag_pub);
+    nh.advertise(imu_pub);
+    nh.advertise(mag_pub);
+    nh.subscribe(wheel_cmd_sub);
   }
+
   pinMode(LED_PIN, OUTPUT);
   flashLED(3);
 
@@ -228,16 +261,38 @@ void setup() {
   right_motor_pulse = 0;
   right_motor_pre_pulse = 0;
 
+  Wire.begin(21, 22);
+  Wire.setClock(400000);
+  delay(2000);
+  if (!myMPU9250.init()) {
 
-  if (ROS_SERIAL) {
-    nh.getHardware()->setBaud(115200);
-    nh.initNode();
-    nh.advertise(wheel_state_pub);
-    nh.advertise(vacumm_diag_pub);
-    nh.subscribe(wheel_cmd_sub);
+    logInfo("MPU9250 does not respond");
+  }
+  else {
+    logInfo("MPU9250 is connected");
+  }
+  if (!myMPU9250.initMagnetometer()) {
+    logInfo("Magnetometer does not respond");
+  }
+  else {
+    logInfo("Magnetometer is connected");
   }
 
-  //  drive(255, 255);
+  logInfo("Position you MPU9250 flat and don't move it - calibrating...");
+  delay(1000);
+  myMPU9250.autoOffsets();
+  Serial.println("Done!");
+
+  myMPU9250.enableGyrDLPF();
+  myMPU9250.setGyrDLPF(MPU9250_DLPF_5);
+  myMPU9250.setSampleRateDivider(5);
+  myMPU9250.setGyrRange(MPU9250_GYRO_RANGE_250);
+
+  myMPU9250.setAccRange(MPU9250_ACC_RANGE_2G);
+  myMPU9250.enableAccDLPF(true);
+  myMPU9250.setAccDLPF(MPU9250_DLPF_4);
+  myMPU9250.setMagOpMode(AK8963_CONT_MODE_100HZ);
+  delay(200);
 }
 
 int avg(double pre, double curr) {
@@ -258,6 +313,38 @@ float leftVel = 0;
 float rightDiff = 0;
 float rightVel = 0;
 char buffers[100];
+xyzFloat acc;
+xyzFloat gyr;
+xyzFloat mag;
+unsigned long prev_imu_time = 0;
+
+void displayIMU() {
+
+  Serial.print("Acc: ");
+  Serial.print(acc.x * (double) G_TO_ACCEL );
+  Serial.print(", ");
+  Serial.print(acc.y * (double) G_TO_ACCEL );
+  Serial.print(", ");
+  Serial.print(acc.z * (double) G_TO_ACCEL );
+  Serial.print(" Gry: ");
+  Serial.print(gyr.x * (double) DEG_TO_RAD );
+  Serial.print(", ");
+  Serial.print(gyr.y * (double) DEG_TO_RAD );
+  Serial.print(", ");
+  Serial.print(gyr.z * (double) DEG_TO_RAD );
+  Serial.print(" Gry: ");
+  Serial.print( (float) mag.x * (float) UTESLA_TO_TESLA );
+  Serial.print(", ");
+  Serial.print((float) mag.y * (float) UTESLA_TO_TESLA );
+  Serial.print(", ");
+  Serial.print((float) mag.z * (float) UTESLA_TO_TESLA );
+  Serial.println("");
+  //  Serial.println("");
+  //  Serial.println("");
+
+}
+
+
 void loop() {
   // put your main code here, to run repeatedly:
   if (ROS_SERIAL) {
@@ -315,7 +402,7 @@ void loop() {
       left_motor_act_vel = twoDec( ((left_input + leftDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS ) ;
     }
 
-    if (right_input >=0) {
+    if (right_input >= 0) {
       right_motor_act_vel = twoDec(((right_input - rightDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS) ;
     } else {
       right_motor_act_vel = twoDec(((right_input + rightDiff) / VELOCITY_TO_PULSE_MULTIPLIER) / WHEEL_RADIUS) ;
@@ -349,13 +436,13 @@ void loop() {
     right_motor_speed = map(right_output, -45, 45, -255, 255);
     //    }
 
-    if (left_motor_vel == 0 && right_motor_vel == 0){
+    if (left_motor_vel == 0 && right_motor_vel == 0) {
       drive(0, 0);
     } else {
-      drive(left_motor_speed, right_motor_speed);  
+      drive(left_motor_speed, right_motor_speed);
     }
     //    drive(left_output, right_output);
-    
+
 
 
     if (!ROS_SERIAL) {
@@ -366,15 +453,15 @@ void loop() {
       Serial.print(right_setpoint);
       Serial.print(" ");
       Serial.print(right_input);
-//      Serial.print(" ");
-//      Serial.print(left_motor_pos);
-//      Serial.print(" ");
-//      Serial.print(right_motor_pos);
+      //      Serial.print(" ");
+      //      Serial.print(left_motor_pos);
+      //      Serial.print(" ");
+      //      Serial.print(right_motor_pos);
       Serial.println();
 
     } else {
-      
-     
+
+
     }
 
 
@@ -394,6 +481,43 @@ void loop() {
       publish_wheel_state();
     }
 
+  }
+
+  if ((millis() - prev_imu_time) >= (20))
+  {
+    acc = myMPU9250.getGValues();
+    gyr = myMPU9250.getGyrValues();
+    mag = myMPU9250.getMagValues();
+
+    if (ROS_SERIAL) {
+      imu_msg.header.frame_id = "imu_link";
+      imu_msg.header.stamp = nh.now();
+  
+      imu_msg.linear_acceleration.y = (acc.x * (double) G_TO_ACCEL) * -1.0;
+      imu_msg.linear_acceleration.x = acc.y * (double) G_TO_ACCEL;
+      imu_msg.linear_acceleration.z = acc.z * (double) G_TO_ACCEL;
+
+      imu_msg.angular_velocity.y = gyr.x * (double) DEG_TO_RAD * -1.0;
+      imu_msg.angular_velocity.x = gyr.y * (double) DEG_TO_RAD;
+      imu_msg.angular_velocity.z = gyr.z * (double) DEG_TO_RAD;
+
+
+      mag_msg.header.frame_id = "imu_link";
+      mag_msg.header.stamp = nh.now();
+      mag_msg.magnetic_field.x = (float) mag.x * (float) UTESLA_TO_TESLA;
+      mag_msg.magnetic_field.y = (float) mag.y * (float) UTESLA_TO_TESLA;
+      mag_msg.magnetic_field.z = (float) mag.z * (float) UTESLA_TO_TESLA;
+
+
+      imu_pub.publish(&imu_msg);
+      mag_pub.publish(&mag_msg);
+      nh.spinOnce();
+    } else {
+      displayIMU();
+    }
+
+
+    prev_imu_time = millis();
   }
 
   delay(1);
