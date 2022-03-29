@@ -39,7 +39,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -102,6 +102,14 @@ Visualization Manager:
           Value: false
         imu_link:
           Value: true
+        left_wheel:
+          Value: true
+        map:
+          Value: true
+        odom:
+          Value: true
+        right_wheel:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -109,17 +117,23 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        base_footprint:
-          base_link:
-            camera_link:
-              camera_rgb_frame:
-                camera_depth_frame:
-                  camera_depth_optical_frame:
-                    {}
-                camera_rgb_optical_frame:
+        map:
+          odom:
+            base_footprint:
+              base_link:
+                camera_link:
+                  camera_rgb_frame:
+                    camera_depth_frame:
+                      camera_depth_optical_frame:
+                        {}
+                    camera_rgb_optical_frame:
+                      {}
+                left_wheel:
                   {}
-            imu_link:
-              {}
+                right_wheel:
+                  {}
+              imu_link:
+                {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -336,18 +350,18 @@ Visualization Manager:
         y_scale: 1
         z_scale: 1
       Class: rviz_imu_plugin/Imu
-      Enabled: true
+      Enabled: false
       Name: Imu
       Queue Size: 10
       Topic: /imu/data
       Unreliable: false
-      Value: true
+      Value: false
       fixed_frame_orientation: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: imu_link
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
