@@ -16,28 +16,14 @@
     <arg unless="$(arg simulation)" name="depth_topic" default="/camera/depth_registered/image_raw"/>
     <arg name="camera_info_topic" default="/camera/rgb/camera_info"/>
 
-    <arg name="wait_for_transform" default="1"/>
+    <arg name="wait_for_transform" default="0.2"/>
 
-
-    <include file="$(find vacumm_navigation)/launch/rtabmap.launch">
-        <arg name="rgbd_sync" value="true" />
-        <arg name="rgbd_topic" value="/camera/rgbd_image" />
-        <arg name="compressed" value="true" />
-        <arg name="rtabmap_args" value="--delete_db_on_start" />
-        <arg name="frame_id" value="base_footprint" />
-        <arg name="odom_frame_id" value="odom" />
-
-        <arg name="odom_tf_angular_variance" value="0.0001"/>
-        <arg name="odom_tf_linear_variance" value="0.0001"/>
-        <arg name="visual_odometry" value="false" />
-        <arg name="odom_topic" value="/diff_drive_controller/odom" />
-    </include>
-
-
-
+   
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find vacumm_description)/rviz/vacumm.rviz"/>
-    <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen" args="_speed:=0.15 _turn:=0.8">
+    <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen" args="_speed:=0.2 _turn:=1">
         <remap from="cmd_vel" to="diff_drive_controller/cmd_vel" />
     </node>
+
 </launch>
+
