@@ -17,7 +17,7 @@
 
   <!-- Map server -->
   <arg name="map_file" default="$(find vacumm_navigation)/maps/maze3.yaml"/>
-  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+  <!-- <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" /> -->
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find vacumm_description)/worlds/vacumm_maze.world"/>

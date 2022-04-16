@@ -290,7 +290,7 @@ void setup() {
 
   myMPU9250.setAccRange(MPU9250_ACC_RANGE_2G);
   myMPU9250.enableAccDLPF(true);
-  myMPU9250.setAccDLPF(MPU9250_DLPF_4);
+  myMPU9250.setAccDLPF(MPU9250_DLPF_6);
   myMPU9250.setMagOpMode(AK8963_CONT_MODE_100HZ);
   delay(200);
 }
@@ -493,12 +493,12 @@ void loop() {
       imu_msg.header.frame_id = "imu_link";
       imu_msg.header.stamp = nh.now();
   
-      imu_msg.linear_acceleration.y = (acc.x * (double) G_TO_ACCEL) * -1.0;
-      imu_msg.linear_acceleration.x = acc.y * (double) G_TO_ACCEL;
+      imu_msg.linear_acceleration.x = (acc.x * (double) G_TO_ACCEL);
+      imu_msg.linear_acceleration.y = acc.y * (double) G_TO_ACCEL;
       imu_msg.linear_acceleration.z = acc.z * (double) G_TO_ACCEL;
 
-      imu_msg.angular_velocity.y = gyr.x * (double) DEG_TO_RAD * -1.0;
-      imu_msg.angular_velocity.x = gyr.y * (double) DEG_TO_RAD;
+      imu_msg.angular_velocity.x = gyr.x * (double) DEG_TO_RAD ;
+      imu_msg.angular_velocity.y = gyr.y * (double) DEG_TO_RAD;
       imu_msg.angular_velocity.z = gyr.z * (double) DEG_TO_RAD;
 
 
