@@ -8,8 +8,9 @@
 #include <vacumm_hardware/VacummDiag.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/MagneticField.h>
+#include <RotaryEncoder.h>
 
-#define ROS_SERIAL true
+#define ROS_SERIAL false
 
 
 #define ACCEL_SCALE 1 / 16384 // LSB/g
@@ -32,12 +33,12 @@
 #define LEFT_MOTOR_ENCODER_A 12
 #define LEFT_MOTOR_ENCODER_B 13
 #define LEFT_MOTOR_ENABLE_PIN 27
-#define VELOCITY_TO_PULSE_MULTIPLIER 150.50
+#define VELOCITY_TO_PULSE_MULTIPLIER 301.00
 
 #define INTERVAL 100
 #define PWM_CHANNEL 0
 #define NO_COMM_MAX 30
-const int TICKS_PER_REVOLUTION = 420;
+const int TICKS_PER_REVOLUTION = 840;
 const double RADS_PER_TICK_COUNT = (2 * PI) / TICKS_PER_REVOLUTION;
 const double WHEEL_RADIUS = 0.04;
 
@@ -82,6 +83,9 @@ int rightMotorPwm[22] = {178, 166, 154, 143, 134, 125, 117, 109, 100, 94, 87, 81
 int leftMotorPwmAC[21] = { -190, -175, -164, -150, -141, -131, -121, -111, -105, -96, -87, -80,  -72, -65, -60, -53, -44, -38, -30, -26, -10};
 int rightMotorPwmAC[21] = { -255, -215, -195, -176, -162, -149, -138, -128, -118, -111, -103, -95, -88, -81, -75, -68, -60, -54, -46, -41, -30};
 
+
+RotaryEncoder *leftEncoder = nullptr;
+RotaryEncoder *rightEncoder = nullptr;
 
 //IMU
 MPU9250_WE myMPU9250 = MPU9250_WE(MPU9250_ADDR);
@@ -194,24 +198,26 @@ void turnOnLed(bool turnOn) {
 
 
 void IRAM_ATTR right_motor_encoder_callback() {
-  int value = digitalRead(rightMotor.encoderPinB);
+  //  int value = digitalRead(rightMotor.encoderPinB);
+  //
+  //  if (value == 0) {
+  //    right_motor_pulse++;
+  //  } else {
+  //    right_motor_pulse--;
+  //  }
 
-  if (value == 0) {
-    right_motor_pulse++;
-  } else {
-    right_motor_pulse--;
-  }
+  rightEncoder->tick();
 
 }
 
 void IRAM_ATTR left_motor_encoder_callback() {
-  int value = digitalRead(leftMotor.encoderPinB);
-  if (value == 0) {
-    left_motor_pulse++;
-  } else {
-    left_motor_pulse--;
-  }
-
+  //  int value = digitalRead(leftMotor.encoderPinB);
+  //  if (value == 0) {
+  //    left_motor_pulse++;
+  //  } else {
+  //    left_motor_pulse--;
+  //  }
+  leftEncoder->tick();
 }
 
 void logInfo(char msg[]) {
@@ -238,17 +244,20 @@ void setup() {
 
   pinMode(LED_PIN, OUTPUT);
   flashLED(3);
-
-  attachInterrupt(rightMotor.encoderPinA, right_motor_encoder_callback, RISING);
-  attachInterrupt(leftMotor.encoderPinA, left_motor_encoder_callback, RISING);
+  leftEncoder = new RotaryEncoder(leftMotor.encoderPinB, leftMotor.encoderPinA, RotaryEncoder::LatchMode::TWO03);
+  rightEncoder = new RotaryEncoder(rightMotor.encoderPinB, rightMotor.encoderPinA, RotaryEncoder::LatchMode::TWO03);
+  attachInterrupt(rightMotor.encoderPinA, right_motor_encoder_callback, CHANGE);
+  attachInterrupt(rightMotor.encoderPinB, right_motor_encoder_callback, CHANGE);
+  attachInterrupt(leftMotor.encoderPinA, left_motor_encoder_callback, CHANGE);
+  attachInterrupt(leftMotor.encoderPinB, left_motor_encoder_callback, CHANGE);
 
   rightMotorPID.SetMode(AUTOMATIC);
   rightMotorPID.SetSampleTime(100);
-  rightMotorPID.SetOutputLimits(-45, 45); // max tick that it can go at 1000 ms (0.299 * 47 ticks)
+  rightMotorPID.SetOutputLimits(-90, 90); // max tick that it can go at 1000 ms (0.299 * 47 ticks)
   ////
   leftMotorPID.SetMode(AUTOMATIC);
   leftMotorPID.SetSampleTime(100);
-  leftMotorPID.SetOutputLimits(-45, 45);
+  leftMotorPID.SetOutputLimits(-90, 90);
 
   drive(0, 0); //reset speed to 0;
 
@@ -352,7 +361,8 @@ void loop() {
   } else {
     readCommand();
   }
-
+  leftEncoder->tick();
+  rightEncoder->tick();
   currentMillis = millis();
 
   if ((millis() - previousMillis) > INTERVAL) {
@@ -362,8 +372,8 @@ void loop() {
     //    setRightPID(right_motor_vel);
 
     noInterrupts();
-    left_motor_curr_pulse = left_motor_pulse;
-    right_motor_curr_pulse = right_motor_pulse;
+    left_motor_curr_pulse = leftEncoder->getPosition();
+    right_motor_curr_pulse = rightEncoder->getPosition();
     interrupts();
     left_input = avg(left_input, left_motor_curr_pulse - left_motor_pre_pulse);
     right_input = avg(right_input, right_motor_curr_pulse - right_motor_pre_pulse);
@@ -425,7 +435,7 @@ void loop() {
     //    } else if (left_output < 0 && abs(left_output) >= 27) {
     //      left_motor_speed = leftMotorPwmAC[47 - (int)abs(left_output)];
     //    } else {
-    left_motor_speed = map (left_output, -45, 45, -255, 255);
+    left_motor_speed = map (left_output, -90, 90, -255, 255);
     //    }
     //
     //    if (right_output > 0 && abs(right_output) >= 26){
@@ -433,7 +443,7 @@ void loop() {
     //    } else if (right_output < 0 && abs(right_output) >= 27){
     //      right_motor_speed = rightMotorPwmAC[47 - (int)abs(right_output)];
     //    } else {
-    right_motor_speed = map(right_output, -45, 45, -255, 255);
+    right_motor_speed = map(right_output, -90, 90, -255, 255);
     //    }
 
     if (left_motor_vel == 0 && right_motor_vel == 0) {
@@ -492,7 +502,7 @@ void loop() {
     if (ROS_SERIAL) {
       imu_msg.header.frame_id = "imu_link";
       imu_msg.header.stamp = nh.now();
-  
+
       imu_msg.linear_acceleration.x = (acc.x * (double) G_TO_ACCEL);
       imu_msg.linear_acceleration.y = acc.y * (double) G_TO_ACCEL;
       imu_msg.linear_acceleration.z = acc.z * (double) G_TO_ACCEL;
@@ -513,7 +523,7 @@ void loop() {
       mag_pub.publish(&mag_msg);
       nh.spinOnce();
     } else {
-      displayIMU();
+//      displayIMU();
     }
 
 
@@ -522,6 +532,34 @@ void loop() {
 
   delay(1);
 }
+
+
+//int leftRPM;
+//int rightRPM;
+//void loop() {
+//  readCommand();
+//  leftEncoder->tick();
+//  rightEncoder->tick();
+//  currentMillis = millis();
+//
+//  if ((millis() - previousMillis) > INTERVAL) {
+//    previousMillis = currentMillis;
+//    left_motor_curr_pulse = leftEncoder->getPosition();
+//    right_motor_curr_pulse = rightEncoder->getPosition();
+//     left_input = avg(left_input, left_motor_curr_pulse - left_motor_pre_pulse);
+//    right_input = avg(right_input, right_motor_curr_pulse - right_motor_pre_pulse);
+//    Serial.print(left_input);
+//    Serial.print(" , "); 
+//    Serial.print(right_input);
+//     Serial.print(" , "); 
+//    Serial.print(leftRPM);
+//    Serial.print(" , "); 
+//    Serial.println(rightRPM);
+//   
+//    left_motor_pre_pulse = left_motor_curr_pulse;// * RADS_PER_TICK_COUNT;
+//    right_motor_pre_pulse = right_motor_curr_pulse; // * RADS_PER_TICK_COUNT;
+//  }
+//}
 
 
 void publish_wheel_state() {
