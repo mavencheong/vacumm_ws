@@ -98,11 +98,11 @@
     <param name="ymax" value="100.0"/>
       <param name="delta" value="0.05"/>
   </node> -->
-
+<!-- 
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find vacumm_description)/rviz/vacumm.rviz"/>
     <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen" args="_speed:=0.2 _turn:=1">
         <remap from="cmd_vel" to="diff_drive_controller/cmd_vel" />
-    </node>
+    </node> -->
 
 </launch>
