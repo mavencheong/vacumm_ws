@@ -12,8 +12,13 @@ namespace vacumm_ns
   {
     // Load rosparams
 
-    wheel_state_sub = nh.subscribe("/vacumm/wheel_state", 1,
-                                   &VacummHWInterface::wheelStateCallback, this);
+    // wheel_state_sub = nh.subscribe("/vacumm/wheel_state", 1,
+    //                                &VacummHWInterface::wheelStateCallback, this);
+
+
+    wheel_encoder_sub = nh.subscribe("/vacumm/wheel_encoder", 1,
+                                   &VacummHWInterface::wheelEncoderCallback, this);
+
 
     wheel_cmd_pub =
         nh.advertise<vacumm_hardware::WheelCmd>("/vacumm/wheel_cmd", 3);
@@ -31,6 +36,25 @@ namespace vacumm_ns
     for (int i = 0; i < num_joints_; i++)
     {
       wheel_degrees[i] = ticksToDegree(msg->pos[i]);
+      wheel_angles[i] = degreeToAngles(wheel_degrees[i]);
+
+      wheel_angles_delta[i] = wheel_angles[i] - joint_position_[i];  
+
+      joint_velocity_[i] = msg->vel[i];
+      joint_position_[i] = wheel_angles[i] ;
+    }
+  }
+
+
+  void VacummHWInterface::wheelEncoderCallback(
+      const vacumm_hardware::WheelState::ConstPtr &msg)
+  {
+    double wheel_angles[2];
+    double wheel_degrees[2];
+    double wheel_angles_delta[2];
+    for (int i = 0; i < num_joints_; i++)
+    {
+      wheel_degrees[i] = ticksToDegree2(msg->pos[i]);
       wheel_angles[i] = degreeToAngles(wheel_degrees[i]);
 
       wheel_angles_delta[i] = wheel_angles[i] - joint_position_[i];  
@@ -83,15 +107,29 @@ namespace vacumm_ns
 
   double VacummHWInterface::ticksToAngle(const int &ticks)
   {
-    double angle = (double)ticks * (2.0 * M_PI / 420.0);
+    double angle = (double)ticks * (2.0 * M_PI / 840.0);
     return angle;
   }
 
   double VacummHWInterface::ticksToDegree(const int &ticks)
   {
-    double angle = (360/420.0)*ticks;
+    double angle = (360/840.0)*ticks;
     return angle;
   }
+
+
+  double VacummHWInterface::ticksToAngle2(const int &ticks)
+  {
+    double angle = (double)ticks * (2.0 * M_PI / 1820.0);
+    return angle;
+  }
+
+  double VacummHWInterface::ticksToDegree2(const int &ticks)
+  {
+    double angle = (360/1820.0)*ticks;
+    return angle;
+  }
+
 
   double VacummHWInterface::degreeToAngles(const double &degree)
   {

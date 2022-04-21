@@ -2,7 +2,7 @@
 #include <vacumm_hardware/WheelState.h>
 #include <RotaryEncoder.h>
 
-#define ROS_SERIAL false
+#define ROS_SERIAL true
 
 #define LEFT_MOTOR_ENCODER_A 18
 #define LEFT_MOTOR_ENCODER_B 19

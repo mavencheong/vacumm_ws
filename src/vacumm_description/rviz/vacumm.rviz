@@ -42,7 +42,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -338,7 +338,7 @@ Visualization Manager:
         Acc. vector color: 255; 0; 0
         Acc. vector scale: 1
         Derotate acceleration: true
-        Enable acceleration: true
+        Enable acceleration: false
       Axes properties:
         Axes scale: 1
         Enable axes: true

@@ -30,11 +30,15 @@ public:
 
 protected:
   ros::Subscriber wheel_state_sub;
+  ros::Subscriber wheel_encoder_sub;
   ros::Publisher wheel_cmd_pub;
   
   void wheelStateCallback(const vacumm_hardware::WheelState::ConstPtr &msg);
+  void wheelEncoderCallback(const vacumm_hardware::WheelState::ConstPtr &msg);
   double ticksToAngle(const int &ticks);
   double ticksToDegree(const int &ticks);
+  double ticksToAngle2(const int &ticks);
+  double ticksToDegree2(const int &ticks);
   double degreeToAngles(const double &degree);
 }; // class
 
