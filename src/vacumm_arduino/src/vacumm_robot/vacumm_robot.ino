@@ -35,6 +35,15 @@
 #define LEFT_MOTOR_ENABLE_PIN 27
 #define VELOCITY_TO_PULSE_MULTIPLIER 301.00
 
+#define LEFT_ENCODER_PIN_A 33
+#define LEFT_ENCODER_PIN_B 32
+#define RIGHT_ENCODER_PIN_A 14
+#define RIGHT_ENCODER_PIN_B 15
+
+
+
+
+
 #define INTERVAL 100
 #define PWM_CHANNEL 0
 #define NO_COMM_MAX 30
@@ -47,20 +56,21 @@ volatile long right_motor_pulse = 0;
 volatile long right_motor_rpm = 0;
 float right_motor_act_vel = 0;
 float right_motor_vel = 0.0;
-int right_motor_pos = 0;
+long right_motor_pos = 0;
 long right_motor_curr_pulse = 0;
 long right_motor_pre_pulse = 0;
 int right_motor_speed = 0;
-
+long right_encoder_pos = 0;
 
 volatile long left_motor_pulse = 0;
 volatile long left_motor_rpm = 0;
 float left_motor_act_vel = 0;
 float left_motor_vel = 0.0;
-int left_motor_pos = 0;
+long left_motor_pos = 0;
 long left_motor_curr_pulse = 0;
 long left_motor_pre_pulse = 0;
 int left_motor_speed = 0;
+long left_encoder_pos = 0;
 
 //global variables
 long currentMillis = 0;
@@ -84,6 +94,10 @@ int leftMotorPwmAC[21] = { -190, -175, -164, -150, -141, -131, -121, -111, -105,
 int rightMotorPwmAC[21] = { -255, -215, -195, -176, -162, -149, -138, -128, -118, -111, -103, -95, -88, -81, -75, -68, -60, -54, -46, -41, -30};
 
 
+RotaryEncoder *leftMotorEncoder = nullptr;
+RotaryEncoder *rightMotorEncoder = nullptr;
+
+
 RotaryEncoder *leftEncoder = nullptr;
 RotaryEncoder *rightEncoder = nullptr;
 
@@ -102,6 +116,7 @@ vacumm_hardware::WheelState wheel_state;
 vacumm_hardware::VacummDiag vacumm_diag;
 ros::Publisher wheel_state_pub("/vacumm/wheel_state", &wheel_state);
 ros::Publisher vacumm_diag_pub("/vacumm/diag", &vacumm_diag);
+
 
 sensor_msgs::Imu imu_msg;
 sensor_msgs::MagneticField mag_msg;
@@ -206,7 +221,7 @@ void IRAM_ATTR right_motor_encoder_callback() {
   //    right_motor_pulse--;
   //  }
 
-  rightEncoder->tick();
+  rightMotorEncoder->tick();
 
 }
 
@@ -217,8 +232,37 @@ void IRAM_ATTR left_motor_encoder_callback() {
   //  } else {
   //    left_motor_pulse--;
   //  }
-  leftEncoder->tick();
+  leftMotorEncoder->tick();
 }
+
+
+void IRAM_ATTR left_encoder_callback() {
+  //  int value = digitalRead(rightMotor.encoderPinB);
+  //
+  //  if (value == 0) {
+  //    right_motor_pulse++;
+  //  } else {
+  //    right_motor_pulse--;
+  //  }
+
+  leftEncoder->tick();
+ 
+
+}
+
+void IRAM_ATTR right_encoder_callback() {
+  //  int value = digitalRead(rightMotor.encoderPinB);
+  //
+  //  if (value == 0) {
+  //    right_motor_pulse++;
+  //  } else {
+  //    right_motor_pulse--;
+  //  }
+
+  rightEncoder->tick();
+
+}
+
 
 void logInfo(char msg[]) {
   if (ROS_SERIAL) {
@@ -244,12 +288,24 @@ void setup() {
 
   pinMode(LED_PIN, OUTPUT);
   flashLED(3);
-  leftEncoder = new RotaryEncoder(leftMotor.encoderPinB, leftMotor.encoderPinA, RotaryEncoder::LatchMode::TWO03);
-  rightEncoder = new RotaryEncoder(rightMotor.encoderPinB, rightMotor.encoderPinA, RotaryEncoder::LatchMode::TWO03);
+  leftMotorEncoder = new RotaryEncoder(leftMotor.encoderPinB, leftMotor.encoderPinA, RotaryEncoder::LatchMode::TWO03);
+  rightMotorEncoder = new RotaryEncoder(rightMotor.encoderPinB, rightMotor.encoderPinA, RotaryEncoder::LatchMode::TWO03);
+
+  leftEncoder = new RotaryEncoder(LEFT_ENCODER_PIN_B, LEFT_ENCODER_PIN_A, RotaryEncoder::LatchMode::TWO03);
+  rightEncoder = new RotaryEncoder(RIGHT_ENCODER_PIN_A, RIGHT_ENCODER_PIN_B, RotaryEncoder::LatchMode::TWO03);
+
   attachInterrupt(rightMotor.encoderPinA, right_motor_encoder_callback, CHANGE);
   attachInterrupt(rightMotor.encoderPinB, right_motor_encoder_callback, CHANGE);
   attachInterrupt(leftMotor.encoderPinA, left_motor_encoder_callback, CHANGE);
   attachInterrupt(leftMotor.encoderPinB, left_motor_encoder_callback, CHANGE);
+
+
+
+  attachInterrupt(LEFT_ENCODER_PIN_A, left_encoder_callback, CHANGE);
+  attachInterrupt(LEFT_ENCODER_PIN_B, left_encoder_callback, CHANGE);
+  attachInterrupt(RIGHT_ENCODER_PIN_A, right_encoder_callback, CHANGE);
+  attachInterrupt(RIGHT_ENCODER_PIN_B, right_encoder_callback, CHANGE);
+  
 
   rightMotorPID.SetMode(AUTOMATIC);
   rightMotorPID.SetSampleTime(100);
@@ -361,8 +417,12 @@ void loop() {
   } else {
     readCommand();
   }
+  leftMotorEncoder->tick();
+  rightMotorEncoder->tick();
+
   leftEncoder->tick();
   rightEncoder->tick();
+  
   currentMillis = millis();
 
   if ((millis() - previousMillis) > INTERVAL) {
@@ -372,8 +432,8 @@ void loop() {
     //    setRightPID(right_motor_vel);
 
     noInterrupts();
-    left_motor_curr_pulse = leftEncoder->getPosition();
-    right_motor_curr_pulse = rightEncoder->getPosition();
+    left_motor_curr_pulse = leftMotorEncoder->getPosition();
+    right_motor_curr_pulse = rightMotorEncoder->getPosition();
     interrupts();
     left_input = avg(left_input, left_motor_curr_pulse - left_motor_pre_pulse);
     right_input = avg(right_input, right_motor_curr_pulse - right_motor_pre_pulse);
@@ -421,8 +481,9 @@ void loop() {
 
     left_motor_pos = left_motor_curr_pulse;// * RADS_PER_TICK_COUNT;
     right_motor_pos = right_motor_curr_pulse; // * RADS_PER_TICK_COUNT;
-
-
+    
+    left_encoder_pos =  leftEncoder->getPosition(); 
+    right_encoder_pos = rightEncoder->getPosition();
     //
     leftMotorPID.Compute();
     rightMotorPID.Compute();
@@ -463,10 +524,10 @@ void loop() {
       Serial.print(right_setpoint);
       Serial.print(" ");
       Serial.print(right_input);
-      //      Serial.print(" ");
-      //      Serial.print(left_motor_pos);
-      //      Serial.print(" ");
-      //      Serial.print(right_motor_pos);
+            Serial.print(" ");
+            Serial.print(left_motor_pos);
+            Serial.print(" ");
+            Serial.print(right_motor_pos);
       Serial.println();
 
     } else {
@@ -538,14 +599,14 @@ void loop() {
 //int rightRPM;
 //void loop() {
 //  readCommand();
-//  leftEncoder->tick();
-//  rightEncoder->tick();
+//  leftMotorEncoder->tick();
+//  rightMotorEncoder->tick();
 //  currentMillis = millis();
 //
 //  if ((millis() - previousMillis) > INTERVAL) {
 //    previousMillis = currentMillis;
-//    left_motor_curr_pulse = leftEncoder->getPosition();
-//    right_motor_curr_pulse = rightEncoder->getPosition();
+//    left_motor_curr_pulse = leftMotorEncoder->getPosition();
+//    right_motor_curr_pulse = rightMotorEncoder->getPosition();
 //     left_input = avg(left_input, left_motor_curr_pulse - left_motor_pre_pulse);
 //    right_input = avg(right_input, right_motor_curr_pulse - right_motor_pre_pulse);
 //    Serial.print(left_input);
@@ -563,11 +624,14 @@ void loop() {
 
 
 void publish_wheel_state() {
+  
   wheel_state.vel[0] = left_motor_act_vel;
   wheel_state.vel[1] = right_motor_act_vel;
   wheel_state.pos[0] = left_motor_pos;
   wheel_state.pos[1] = right_motor_pos;
-
+  wheel_state.encoder[0] = left_encoder_pos;
+  wheel_state.encoder[1] = right_encoder_pos;
+  
   wheel_state_pub.publish(&wheel_state);
 
 

@@ -12,12 +12,12 @@ namespace vacumm_ns
   {
     // Load rosparams
 
-    // wheel_state_sub = nh.subscribe("/vacumm/wheel_state", 1,
-    //                                &VacummHWInterface::wheelStateCallback, this);
+    wheel_state_sub = nh.subscribe("/vacumm/wheel_state", 1,
+                                   &VacummHWInterface::wheelStateCallback, this);
 
 
-    wheel_encoder_sub = nh.subscribe("/vacumm/wheel_encoder", 1,
-                                   &VacummHWInterface::wheelEncoderCallback, this);
+    // wheel_encoder_sub = nh.subscribe("/vacumm/wheel_encoder", 1,
+    //                                &VacummHWInterface::wheelEncoderCallback, this);
 
 
     wheel_cmd_pub =
@@ -35,7 +35,7 @@ namespace vacumm_ns
     double wheel_angles_delta[2];
     for (int i = 0; i < num_joints_; i++)
     {
-      wheel_degrees[i] = ticksToDegree(msg->pos[i]);
+      wheel_degrees[i] = ticksToDegree2(msg->encoder[i]);
       wheel_angles[i] = degreeToAngles(wheel_degrees[i]);
 
       wheel_angles_delta[i] = wheel_angles[i] - joint_position_[i];  
@@ -45,24 +45,6 @@ namespace vacumm_ns
     }
   }
 
-
-  void VacummHWInterface::wheelEncoderCallback(
-      const vacumm_hardware::WheelState::ConstPtr &msg)
-  {
-    double wheel_angles[2];
-    double wheel_degrees[2];
-    double wheel_angles_delta[2];
-    for (int i = 0; i < num_joints_; i++)
-    {
-      wheel_degrees[i] = ticksToDegree2(msg->pos[i]);
-      wheel_angles[i] = degreeToAngles(wheel_degrees[i]);
-
-      wheel_angles_delta[i] = wheel_angles[i] - joint_position_[i];  
-
-      joint_velocity_[i] = msg->vel[i];
-      joint_position_[i] = wheel_angles[i] ;
-    }
-  }
 
   void VacummHWInterface::init()
   {

@@ -39,13 +39,13 @@
 
    
 
-    <node name="ros_serial_motor" pkg="rosserial_python" type="serial_node.py" output="screen">
+    <!-- <node name="ros_serial_motor" pkg="rosserial_python" type="serial_node.py" output="screen">
         <param name="port" type="string" value="/dev/ttyUSB0"/>
         <param name="baud" type="int" value="115200"/>
-    </node>
+    </node> -->
 
     <node name="ros_serial_encoder" pkg="rosserial_python" type="serial_node.py" output="screen">
-        <param name="port" type="string" value="/dev/ttyUSB1"/>
+        <param name="port" type="string" value="/dev/ttyUSB0"/>
         <param name="baud" type="int" value="115200"/>
     </node>
 

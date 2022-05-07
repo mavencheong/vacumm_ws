@@ -14,10 +14,12 @@ namespace vacumm_hardware
     public:
       float vel[2];
       int32_t pos[2];
+      int32_t encoder[2];
 
     WheelState():
       vel(),
-      pos()
+      pos(),
+      encoder()
     {
     }
 
@@ -47,6 +49,18 @@ namespace vacumm_hardware
       *(outbuffer + offset + 2) = (u_posi.base >> (8 * 2)) & 0xFF;
       *(outbuffer + offset + 3) = (u_posi.base >> (8 * 3)) & 0xFF;
       offset += sizeof(this->pos[i]);
+      }
+      for( uint32_t i = 0; i < 2; i++){
+      union {
+        int32_t real;
+        uint32_t base;
+      } u_encoderi;
+      u_encoderi.real = this->encoder[i];
+      *(outbuffer + offset + 0) = (u_encoderi.base >> (8 * 0)) & 0xFF;
+      *(outbuffer + offset + 1) = (u_encoderi.base >> (8 * 1)) & 0xFF;
+      *(outbuffer + offset + 2) = (u_encoderi.base >> (8 * 2)) & 0xFF;
+      *(outbuffer + offset + 3) = (u_encoderi.base >> (8 * 3)) & 0xFF;
+      offset += sizeof(this->encoder[i]);
       }
       return offset;
     }
@@ -80,11 +94,24 @@ namespace vacumm_hardware
       this->pos[i] = u_posi.real;
       offset += sizeof(this->pos[i]);
       }
+      for( uint32_t i = 0; i < 2; i++){
+      union {
+        int32_t real;
+        uint32_t base;
+      } u_encoderi;
+      u_encoderi.base = 0;
+      u_encoderi.base |= ((uint32_t) (*(inbuffer + offset + 0))) << (8 * 0);
+      u_encoderi.base |= ((uint32_t) (*(inbuffer + offset + 1))) << (8 * 1);
+      u_encoderi.base |= ((uint32_t) (*(inbuffer + offset + 2))) << (8 * 2);
+      u_encoderi.base |= ((uint32_t) (*(inbuffer + offset + 3))) << (8 * 3);
+      this->encoder[i] = u_encoderi.real;
+      offset += sizeof(this->encoder[i]);
+      }
      return offset;
     }
 
     virtual const char * getType() override { return "vacumm_hardware/WheelState"; };
-    virtual const char * getMD5() override { return "35524fa304999ef0b8123445f7d24472"; };
+    virtual const char * getMD5() override { return "cc430533c8c2cf8b0fbfa7ac0464dbfe"; };
 
   };
 
