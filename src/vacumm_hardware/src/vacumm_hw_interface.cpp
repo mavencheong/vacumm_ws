@@ -102,13 +102,13 @@ namespace vacumm_ns
 
   double VacummHWInterface::ticksToAngle2(const int &ticks)
   {
-    double angle = (double)ticks * (2.0 * M_PI / 1820.0);
+    double angle = (double)ticks * (2.0 * M_PI / 1205.0);
     return angle;
   }
 
   double VacummHWInterface::ticksToDegree2(const int &ticks)
   {
-    double angle = (360/1820.0)*ticks;
+    double angle = (360/1205.0)*ticks;
     return angle;
   }
 

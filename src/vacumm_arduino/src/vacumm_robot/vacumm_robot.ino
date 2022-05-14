@@ -528,6 +528,10 @@ void loop() {
             Serial.print(left_motor_pos);
             Serial.print(" ");
             Serial.print(right_motor_pos);
+            Serial.print(" ");
+            Serial.print(left_encoder_pos);
+            Serial.print(" ");
+            Serial.print(right_encoder_pos);
       Serial.println();
 
     } else {
