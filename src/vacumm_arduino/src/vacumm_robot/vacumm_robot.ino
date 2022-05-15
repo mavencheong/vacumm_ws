@@ -11,6 +11,7 @@
 #include <RotaryEncoder.h>
 
 #define ROS_SERIAL true
+#define USE_ENCODER true
 
 
 #define ACCEL_SCALE 1 / 16384 // LSB/g

@@ -11,7 +11,7 @@
         --inorder " />
 
 
-    <rosparam command="load" file="$(find vacumm_control)/config/control2.yaml" />
+    <rosparam command="load" file="$(find vacumm_control)/config/control.yaml" />
 
     <!-- Load hardware interface -->
     <node name="vacumm_hw_main" pkg="vacumm_hardware" type="vacumm_hw_main" output="screen"/>
@@ -60,12 +60,12 @@
 
     </node>
 
-    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="base_footprint_to_imu_link" args="0 0 0 0 0 0  /base_footprint /imu_link"/> -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="base_footprint_to_imu_link" args="0 0 0 0 0 0  /base_footprint /imu_link"/>
 
 
-    <!-- <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" clear_params="true">
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" clear_params="true">
         <rosparam command="load" file="$(find vacumm_navigation)/config3/ekf_localization.yaml"/>
-    </node> -->
+    </node>
 
 
 
