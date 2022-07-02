@@ -11,7 +11,7 @@
         --inorder " />
 
 
-    <rosparam command="load" file="$(find vacumm_control)/config/control.yaml" />
+    <rosparam command="load" file="$(find vacumm_control)/config/control2.yaml" />
 
     <!-- Load hardware interface -->
     <node name="vacumm_hw_main" pkg="vacumm_hardware" type="vacumm_hw_main" output="screen"/>
@@ -30,7 +30,7 @@
         <param name="baud" type="int" value="115200"/>
     </node>
 
-    <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen" respawn="false">
+    <!-- <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen" respawn="false">
         <remap from="/imu/data_raw" to="/vacumm/imu"/>
         <param name="fixed_frame" value="base_link" />
         <param name="use_mag" value="false" />
@@ -43,7 +43,7 @@
 
     <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">
         <rosparam command="load" file="$(find vacumm_navigation)/config3/ekf_localization.yaml"/>
-    </node>
+    </node> -->
 
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find vacumm_description)/rviz/vacumm.rviz"/>

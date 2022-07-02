@@ -518,22 +518,22 @@ void loop() {
 
 
     if (!ROS_SERIAL) {
-      Serial.print(left_setpoint);
-      Serial.print(" ");
-      Serial.print(left_input);
-      Serial.print(" ");
-      Serial.print(right_setpoint);
-      Serial.print(" ");
-      Serial.print(right_input);
-            Serial.print(" ");
-            Serial.print(left_motor_pos);
-            Serial.print(" ");
-            Serial.print(right_motor_pos);
-            Serial.print(" ");
-            Serial.print(left_encoder_pos);
-            Serial.print(" ");
-            Serial.print(right_encoder_pos);
-      Serial.println();
+//      Serial.print(left_setpoint);
+//      Serial.print(" ");
+//      Serial.print(left_input);
+//      Serial.print(" ");
+//      Serial.print(right_setpoint);
+//      Serial.print(" ");
+//      Serial.print(right_input);
+//            Serial.print(" ");
+//            Serial.print(left_motor_pos);
+//            Serial.print(" ");
+//            Serial.print(right_motor_pos);
+//            Serial.print(" ");
+//            Serial.print(left_encoder_pos);
+//            Serial.print(" ");
+//            Serial.print(right_encoder_pos);
+//      Serial.println();
 
     } else {
 
@@ -589,7 +589,7 @@ void loop() {
       mag_pub.publish(&mag_msg);
       nh.spinOnce();
     } else {
-//      displayIMU();
+      displayIMU();
     }
 
 
