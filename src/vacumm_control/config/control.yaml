@@ -40,7 +40,7 @@ diff_drive_controller:
     # URDF if not specified as a parameter
     # cmd_vel_timeout: 0.25
     # velocity_rolling_window_size: 20ss
-    wheel_separation : 0.22
+    wheel_separation : 0.27
 
     wheel_radius : 0.0425 
     #0.042925

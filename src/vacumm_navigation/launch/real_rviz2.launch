@@ -33,7 +33,7 @@
     <param name="srt" value="0"/>
     <param name="str" value="0"/>
     <param name="stt" value="0"/>
-    <param name="particles" value="10"/>
+    <param name="particles" value="300"/>
     <param name="linearUpdate" value="0.01"/>
     <param name="angularUpdate" value="0.01"/>
     <param name="temporalUpdate" value="-1.0"/>
@@ -49,7 +49,7 @@
   </node>
 
        <!-- Move base -->
-  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+  <!-- <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
     <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
     <rosparam file="$(find vacumm_navigation)/config3/costmap_common_params.yaml" command="load" ns="global_costmap" />
     <rosparam file="$(find vacumm_navigation)/config3/costmap_common_params.yaml" command="load" ns="local_costmap" />
@@ -59,7 +59,7 @@
     <rosparam file="$(find vacumm_navigation)/config3/dwa_local_planner_params.yaml" command="load" />
     <remap from="cmd_vel" to="diff_drive_controller/cmd_vel" />
   </node>
-
+ -->
 
   <!-- <node pkg="explore_lite" type="explore" respawn="true" name="explore" output="screen">
     <rosparam file="$(find vacumm_navigation)/config3/exploration.yaml" command="load" />

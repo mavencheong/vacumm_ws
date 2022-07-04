@@ -11,7 +11,7 @@
         --inorder " />
 
 
-    <rosparam command="load" file="$(find vacumm_control)/config/control.yaml" />
+    <rosparam command="load" file="$(find vacumm_control)/config/control2.yaml" />
 
     <!-- Load hardware interface -->
     <node name="vacumm_hw_main" pkg="vacumm_hardware" type="vacumm_hw_main" output="screen"/>
@@ -71,11 +71,11 @@
 
 
   
-<!-- 
+
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find vacumm_description)/rviz/vacumm.rviz"/>
     <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen" args="_speed:=0.2 _turn:=1">
         <remap from="cmd_vel" to="diff_drive_controller/cmd_vel" />
-    </node> -->
+    </node>
 
 </launch>

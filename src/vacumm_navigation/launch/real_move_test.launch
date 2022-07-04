@@ -23,12 +23,26 @@
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
     </node>
 
-   
+
 
     <node name="ros_serial_node" pkg="rosserial_python" type="serial_node.py" output="screen">
         <param name="port" type="string" value="/dev/ttyUSB0"/>
         <param name="baud" type="int" value="115200"/>
     </node>
+
+    <include file="$(find freenect_launch)/launch/freenect.launch">
+        <arg name="depth_registration" value="false" />
+        <arg name="publish_tf" default="false"/>
+    </include>
+
+
+    <node name="pointcloud_to_laserscan" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node">
+        <remap from="cloud_in" to="/camera/depth/points" />
+        <remap from="scan" to="/camera/scan" />
+        <param name="target_frame" type="str" value="camera_link"/>
+    </node>
+
+
 
     <!-- <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen" respawn="false">
         <remap from="/imu/data_raw" to="/vacumm/imu"/>
@@ -45,10 +59,10 @@
         <rosparam command="load" file="$(find vacumm_navigation)/config3/ekf_localization.yaml"/>
     </node> -->
 
-
+<!-- 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find vacumm_description)/rviz/vacumm.rviz"/>
     <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen" args="_speed:=0.2 _turn:=1">
         <remap from="cmd_vel" to="diff_drive_controller/cmd_vel" />
-    </node>
+    </node> -->
 
 </launch>
